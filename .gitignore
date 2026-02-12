@@ -1,0 +1,14 @@
+node_modules/
+dist/
+dist-electron/
+out/
+.DS_Store
+*.log
+.env
+.env.*
+!.env.example
+coverage/
+.idea/
+.vscode/
+*.tsbuildinfo
+bun.lockb
