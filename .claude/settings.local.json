@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(bun --version:*)",
+      "Bash(npm:*)",
+      "Bash(node --version:*)",
+      "Bash(curl:*)",
+      "Bash(bash:*)",
+      "Bash(export PATH=\"$HOME/.bun/bin:$PATH\")",
+      "Bash(bun add:*)"
+    ]
+  }
+}
