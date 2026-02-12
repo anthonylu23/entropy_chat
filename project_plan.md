@@ -8,20 +8,20 @@ Entropy Chat is a lightweight desktop AI chat application that provides a unifie
 
 ## Tech Stack
 
-| Layer | Technology | Why |
-|---|---|---|
-| Language | TypeScript (strict) | Type safety across main + renderer processes |
-| Runtime | Bun | Fast installs, native TS, built-in test runner |
-| Desktop | Electron | Cross-platform, mature ecosystem |
-| UI Framework | React + Vite | Fast HMR, lean bundles, no SSR overhead |
-| Routing | TanStack Router | Type-safe file-based routing |
-| Data Fetching | TanStack Query | Streaming management, caching, optimistic updates |
-| Styling | Tailwind CSS + shadcn/ui | Utility-first with accessible, minimal components |
-| AI Integration | Vercel AI SDK (`ai`) | Unified streaming across all providers |
-| Local DB | SQLite via `better-sqlite3` | Keys, conversations, settings — all local |
-| Cloud Backend | Convex | Real-time memory sync, user auth |
-| Local Models | Ollama | OpenAI-compatible REST API on localhost |
-| State | Zustand | Lightweight stores for UI state |
+| Layer          | Technology                  | Why                                               |
+| -------------- | --------------------------- | ------------------------------------------------- |
+| Language       | TypeScript (strict)         | Type safety across main + renderer processes      |
+| Runtime        | Bun                         | Fast installs, native TS, built-in test runner    |
+| Desktop        | Electron                    | Cross-platform, mature ecosystem                  |
+| UI Framework   | React + Vite                | Fast HMR, lean bundles, no SSR overhead           |
+| Routing        | TanStack Router             | Type-safe file-based routing                      |
+| Data Fetching  | TanStack Query              | Streaming management, caching, optimistic updates |
+| Styling        | Tailwind CSS + shadcn/ui    | Utility-first with accessible, minimal components |
+| AI Integration | Vercel AI SDK (`ai`)        | Unified streaming across all providers            |
+| Local DB       | SQLite via `better-sqlite3` | Keys, conversations, settings — all local         |
+| Cloud Backend  | Convex                      | Real-time memory sync, user auth                  |
+| Local Models   | Ollama                      | OpenAI-compatible REST API on localhost           |
+| State          | Zustand                     | Lightweight stores for UI state                   |
 
 ---
 
@@ -175,22 +175,22 @@ users: defineTable({
   email: v.string(),
   name: v.optional(v.string()),
   createdAt: v.number(),
-})
+});
 
 memories: defineTable({
   userId: v.id("users"),
-  content: v.string(),         // extracted fact or preference
-  category: v.string(),        // "preference" | "context" | "instruction"
-  source: v.string(),          // "explicit" | "extracted"
+  content: v.string(), // extracted fact or preference
+  category: v.string(), // "preference" | "context" | "instruction"
+  source: v.string(), // "explicit" | "extracted"
   createdAt: v.number(),
-}).index("by_user", ["userId"])
+}).index("by_user", ["userId"]);
 
 syncState: defineTable({
   userId: v.id("users"),
   deviceId: v.string(),
-  preferences: v.string(),     // JSON blob
+  preferences: v.string(), // JSON blob
   lastSync: v.number(),
-}).index("by_user_device", ["userId", "deviceId"])
+}).index("by_user_device", ["userId", "deviceId"]);
 ```
 
 ---
@@ -207,22 +207,22 @@ Entropy Chat supports three tiers of provider authentication, from stable offici
 
 #### Provider Tier Matrix
 
-| Tier | Providers | Auth Method | Stability | Phase |
-|---|---|---|---|---|
-| **Official API** | OpenAI, Anthropic, Gemini, Ollama | API key (local encrypted) | Stable | Phase 2 |
-| **Official OAuth** | GitHub Copilot | OAuth device flow | Stable | Phase 2 |
-| **Subscription Bridge** | ChatGPT Plus, Claude Pro | Session token extraction | Experimental | Phase 3 |
+| Tier                    | Providers                         | Auth Method               | Stability    | Phase   |
+| ----------------------- | --------------------------------- | ------------------------- | ------------ | ------- |
+| **Official API**        | OpenAI, Anthropic, Gemini, Ollama | API key (local encrypted) | Stable       | Phase 2 |
+| **Official OAuth**      | GitHub Copilot                    | OAuth device flow         | Stable       | Phase 2 |
+| **Subscription Bridge** | ChatGPT Plus, Claude Pro          | Session token extraction  | Experimental | Phase 3 |
 
 #### Tier 1 — Official API (Stable)
 
 Standard API key authentication. Keys are encrypted via Electron's `safeStorage` API and stored in local SQLite. Keys are decrypted only in the main process at the moment of the API call, never exposed to the renderer or any remote server.
 
-| Provider | Auth | Storage | Notes |
-|---|---|---|---|
-| OpenAI | API Key | Encrypted SQLite | Standard `OPENAI_API_KEY` |
-| Anthropic | API Key | Encrypted SQLite | Standard `ANTHROPIC_API_KEY` |
+| Provider      | Auth    | Storage          | Notes                        |
+| ------------- | ------- | ---------------- | ---------------------------- |
+| OpenAI        | API Key | Encrypted SQLite | Standard `OPENAI_API_KEY`    |
+| Anthropic     | API Key | Encrypted SQLite | Standard `ANTHROPIC_API_KEY` |
 | Google Gemini | API Key | Encrypted SQLite | Generous free tier available |
-| Ollama | None | N/A | Localhost, no auth needed |
+| Ollama        | None    | N/A              | Localhost, no auth needed    |
 
 #### Tier 2 — Official OAuth (Stable)
 
@@ -241,16 +241,19 @@ This is the "bring your own subscription" feature. Users with existing ChatGPT P
 5. Token refresh is handled automatically; re-auth is prompted when sessions expire
 
 **ChatGPT Plus bridge:**
+
 - Extracts `__Secure-next-auth.session-token` from the ChatGPT web session
 - Routes through OpenAI's internal chat completions endpoint
 - Supports GPT-4o and all models available on the Plus plan
 
 **Claude Pro bridge:**
+
 - Extracts session token from the claude.ai session
 - Routes through Anthropic's internal conversation API
 - Supports Claude Sonnet/Opus and all models available on the Pro plan
 
 **Important constraints:**
+
 - These bridges use unofficial, reverse-engineered endpoints that can break at any time
 - Clearly labeled as **"Experimental"** in the UI with a warning badge
 - Users are informed that this may violate provider Terms of Service
@@ -259,12 +262,12 @@ This is the "bring your own subscription" feature. Users with existing ChatGPT P
 
 #### Auth Storage Summary
 
-| Data | Storage | Encrypted | Synced |
-|---|---|---|---|
-| API keys | Local SQLite | AES-256 via safeStorage | Never |
-| OAuth tokens (Copilot) | Local SQLite + OS keychain | safeStorage | Never |
-| Session tokens (bridges) | Local SQLite | AES-256 via safeStorage | Never |
-| User account (Entropy Chat) | Convex Auth | Managed | Cloud |
+| Data                        | Storage                    | Encrypted               | Synced |
+| --------------------------- | -------------------------- | ----------------------- | ------ |
+| API keys                    | Local SQLite               | AES-256 via safeStorage | Never  |
+| OAuth tokens (Copilot)      | Local SQLite + OS keychain | safeStorage             | Never  |
+| Session tokens (bridges)    | Local SQLite               | AES-256 via safeStorage | Never  |
+| User account (Entropy Chat) | Convex Auth                | Managed                 | Cloud  |
 
 ### Split-Screen
 
@@ -297,31 +300,31 @@ Weights: 400 (regular), 500 (medium), 600 (semibold), 700 (bold)
 
 **Dark Theme (Default)**
 
-| Token | Hex | Usage |
-|---|---|---|
-| `--base` | `#3a3b3b` | Page background |
-| `--surface` | `#434545` | Cards, elevated surfaces |
-| `--elevated` | `#4c4d4d` | Higher elevation surfaces |
-| `--accent` | `#00b8a9` | Primary accent (teal/cyan) |
-| `--accent-hover` | `#00a899` | Hover state |
-| `--glow` | `#00b8a9` | Glow effects |
-| `--text-primary` | `#e8e5e2` | Primary text (warm off-white) |
-| `--text-secondary` | `#b8b5b2` | Secondary/muted text |
-| `--text-inverse` | `#16181c` | Text on light backgrounds |
-| `--border` | `#5e6165` | Borders |
-| `--destructive` | `#c72c2c` | Error/destructive actions |
+| Token              | Hex       | Usage                         |
+| ------------------ | --------- | ----------------------------- |
+| `--base`           | `#3a3b3b` | Page background               |
+| `--surface`        | `#434545` | Cards, elevated surfaces      |
+| `--elevated`       | `#4c4d4d` | Higher elevation surfaces     |
+| `--accent`         | `#00b8a9` | Primary accent (teal/cyan)    |
+| `--accent-hover`   | `#00a899` | Hover state                   |
+| `--glow`           | `#00b8a9` | Glow effects                  |
+| `--text-primary`   | `#e8e5e2` | Primary text (warm off-white) |
+| `--text-secondary` | `#b8b5b2` | Secondary/muted text          |
+| `--text-inverse`   | `#16181c` | Text on light backgrounds     |
+| `--border`         | `#5e6165` | Borders                       |
+| `--destructive`    | `#c72c2c` | Error/destructive actions     |
 
 **Light Theme**
 
-| Token | Hex | Usage |
-|---|---|---|
-| `--base` | `#e8d9b8` | Page background (warm tan) |
-| `--surface` | `#fcf2d0` | Cards (warm cream) |
-| `--accent` | `#d99a1f` | Primary accent (golden amber) |
-| `--accent-hover` | `#b37a11` | Hover state |
-| `--text-primary` | `#3a3736` | Primary text |
-| `--text-secondary` | `#665f58` | Secondary text |
-| `--border` | `#d4c8a8` | Borders |
+| Token              | Hex       | Usage                         |
+| ------------------ | --------- | ----------------------------- |
+| `--base`           | `#e8d9b8` | Page background (warm tan)    |
+| `--surface`        | `#fcf2d0` | Cards (warm cream)            |
+| `--accent`         | `#d99a1f` | Primary accent (golden amber) |
+| `--accent-hover`   | `#b37a11` | Hover state                   |
+| `--text-primary`   | `#3a3736` | Primary text                  |
+| `--text-secondary` | `#665f58` | Secondary text                |
+| `--border`         | `#d4c8a8` | Borders                       |
 
 #### Glassmorphism Effects
 
@@ -330,11 +333,19 @@ Weights: 400 (regular), 500 (medium), 600 (semibold), 700 (bold)
 backdrop-filter: blur(18px) saturate(1.85) brightness(1.1);
 
 /* Glass surface (dark) */
-background: linear-gradient(145deg, rgba(20, 22, 30, 0.55), rgba(255, 255, 255, 0.08));
+background: linear-gradient(
+  145deg,
+  rgba(20, 22, 30, 0.55),
+  rgba(255, 255, 255, 0.08)
+);
 border: 1px solid rgba(255, 255, 255, 0.22);
 
 /* Glass surface (light) */
-background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+background: linear-gradient(
+  145deg,
+  rgba(255, 255, 255, 0.2),
+  rgba(255, 255, 255, 0.05)
+);
 border: 1px solid rgba(255, 255, 255, 0.32);
 
 /* Glow shadow */
@@ -353,34 +364,40 @@ box-shadow:
 ```typescript
 // tailwind.config.ts
 module.exports = {
-  darkMode: ['class'],
+  darkMode: ["class"],
   theme: {
     extend: {
       colors: {
-        base: 'hsl(var(--base))',
-        surface: 'hsl(var(--surface))',
-        elevated: 'hsl(var(--elevated))',
-        accent: 'hsl(var(--accent))',
-        accentHover: 'hsl(var(--accent-hover))',
-        textPrimary: 'hsl(var(--text-primary))',
-        textSecondary: 'hsl(var(--text-secondary))',
-        textInverse: 'hsl(var(--text-inverse))',
+        base: "hsl(var(--base))",
+        surface: "hsl(var(--surface))",
+        elevated: "hsl(var(--elevated))",
+        accent: "hsl(var(--accent))",
+        accentHover: "hsl(var(--accent-hover))",
+        textPrimary: "hsl(var(--text-primary))",
+        textSecondary: "hsl(var(--text-secondary))",
+        textInverse: "hsl(var(--text-inverse))",
       },
       fontFamily: {
-        sans: ['"IBM Plex Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+        sans: [
+          '"IBM Plex Mono"',
+          "ui-monospace",
+          "SFMono-Regular",
+          "Menlo",
+          "monospace",
+        ],
       },
       boxShadow: {
-        glow: '0 20px 45px hsl(var(--glow) / 0.35)',
+        glow: "0 20px 45px hsl(var(--glow) / 0.35)",
       },
       borderRadius: {
-        lg: '1.5rem',
-        md: 'calc(1.5rem - 2px)',
-        sm: 'calc(1.5rem - 4px)',
+        lg: "1.5rem",
+        md: "calc(1.5rem - 2px)",
+        sm: "calc(1.5rem - 4px)",
       },
     },
   },
-  plugins: [require('tailwindcss-animate')],
-}
+  plugins: [require("tailwindcss-animate")],
+};
 ```
 
 #### Custom Theme Engine (VS Code-style)
@@ -407,8 +424,8 @@ On top of the core design system, users can install additional themes. Themes ar
     "text-secondary": "219 20% 72%",
     "text-inverse": "220 16% 12%",
     "border": "220 16% 36%",
-    "destructive": "354 42% 56%"
-  }
+    "destructive": "354 42% 56%",
+  },
 }
 ```
 
@@ -493,15 +510,15 @@ Auto-detects running Ollama on localhost. Uses the same chat interface as cloud 
 
 ## Risks
 
-| Risk | Mitigation |
-|---|---|
-| Electron memory bloat | Lazy-load panes, aggressive code splitting, profile with `electron-debug` |
-| Provider API changes | Vercel AI SDK absorbs most; pin versions, add integration tests |
-| Copilot OAuth complexity | Build as isolated module, test early, fallback to API key entry |
+| Risk                          | Mitigation                                                                                                                                                           |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Electron memory bloat         | Lazy-load panes, aggressive code splitting, profile with `electron-debug`                                                                                            |
+| Provider API changes          | Vercel AI SDK absorbs most; pin versions, add integration tests                                                                                                      |
+| Copilot OAuth complexity      | Build as isolated module, test early, fallback to API key entry                                                                                                      |
 | Subscription bridges breaking | Label as experimental, build health checks that detect failures fast, prompt fallback to API key auth, keep bridge code isolated so breakage doesn't affect core app |
-| Provider ToS enforcement | Inform users of risk in UI, never store session tokens in cloud, make bridges opt-in |
-| Convex lock-in | Keep usage minimal (memory + auth only), abstract behind interface |
-| Split-screen state leaks | Isolated React subtrees with independent query clients |
+| Provider ToS enforcement      | Inform users of risk in UI, never store session tokens in cloud, make bridges opt-in                                                                                 |
+| Convex lock-in                | Keep usage minimal (memory + auth only), abstract behind interface                                                                                                   |
+| Split-screen state leaks      | Isolated React subtrees with independent query clients                                                                                                               |
 
 ---
 
