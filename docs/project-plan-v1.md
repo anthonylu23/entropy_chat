@@ -30,7 +30,7 @@ Entropy Chat is a lightweight desktop AI chat application that provides a unifie
 ```
 ┌─────────────────────────────────────────────────┐
 │                 Renderer (React)                 │
-│  Routes · Chat UI · Split Panes · Model Selector │
+│  Arc Workspace (Spaces/Tabs/Split/Focus) · Chat UI · Model Selector │
 └──────────────────┬──────────────────────────────┘
                    │ IPC (contextBridge)
 ┌──────────────────▼──────────────────────────────┐
@@ -49,6 +49,8 @@ Gemini)              via session
 ```
 
 **Key principle:** The renderer never touches Node APIs, SQLite, or raw API keys. Everything goes through typed IPC handlers in the main process.
+
+Near-term workspace planning is tracked in [`docs/phase1-slice2-arc-workspace-plan.md`](/Users/anthony/Documents/CS/Coding/entropy_chat/docs/phase1-slice2-arc-workspace-plan.md).
 
 ---
 
@@ -269,9 +271,11 @@ This is the "bring your own subscription" feature. Users with existing ChatGPT P
 | Session tokens (bridges)    | Local SQLite               | AES-256 via safeStorage | Never  |
 | User account (Entropy Chat) | Convex Auth                | Managed                 | Cloud  |
 
-### Split-Screen
+### Workspace Layout
 
-Independent chat panes managed by Zustand. Each pane owns its own conversation state, model selection, and TanStack Query context. Layout options: horizontal split, vertical split, grid. Max 4 panes. A "broadcast" mode sends the same prompt to all active panes for response comparison.
+Planned near-term (Phase 1 Slice 2): Arc-style workspace shell with persistent spaces, per-space pinned tabs, two-pane split view, and focus modes (Zen mode + single-pane focus).
+
+Planned later (Phase 3+): advanced multi-pane layouts (3-4 panes), grid variants, and broadcast comparison mode.
 
 ### Memory
 
@@ -441,16 +445,37 @@ Auto-detects running Ollama on localhost. Uses the same chat interface as cloud 
 
 ### Phase 1 — Foundation (2–3 weeks)
 
-- [ ] Scaffold Electron + Vite + React with TypeScript (use `electron-vite`)
-- [ ] Set up preload script with typed IPC bridge
-- [ ] Integrate `better-sqlite3`, define schema, write migrations
-- [ ] Build basic chat UI: single thread, message list, input bar (shadcn/ui)
-- [ ] Implement first provider (OpenAI) via Vercel AI SDK with streaming
-- [ ] Settings panel for API key input, encrypted storage via safeStorage
-- [ ] Conversation persistence: save/load threads from SQLite
-- [ ] Basic sidebar with conversation list
+Status: shipped (Slice 1 baseline).
+
+- [x] Scaffold Electron + Vite + React with TypeScript (use `electron-vite`)
+- [x] Set up preload script with typed IPC bridge
+- [x] Integrate `better-sqlite3`, define schema, write migrations
+- [x] Build basic chat UI: single thread, message list, input bar (shadcn/ui)
+- [x] Implement first provider (OpenAI) via Vercel AI SDK with streaming
+- [x] Settings panel for API key input, encrypted storage via safeStorage
+- [x] Conversation persistence: save/load threads from SQLite
+- [x] Basic sidebar with conversation list
 
 **Milestone:** Working single-provider chat app with encrypted local key storage.
+
+### Phase 1 — Slice 2 (Arc Workspace UI) (1–2 weeks)
+
+Status: planned.
+
+Detailed plan: [`docs/phase1-slice2-arc-workspace-plan.md`](/Users/anthony/Documents/CS/Coding/entropy_chat/docs/phase1-slice2-arc-workspace-plan.md)
+
+- [ ] Add SQLite migration for spaces and conversation space assignment.
+- [ ] Add `spaces.*` IPC/preload API (`list`, `create`, `update`, `reorder`).
+- [ ] Extend `conversations.*` with `create(spaceId)`, `pin`, `reorderPinned`, `moveToSpace`.
+- [ ] Add planned `ConversationSummary` fields: `spaceId`, `pinnedOrder`.
+- [ ] Refactor shell into Arc-style workspace (spaces rail, sidebar, pinned tabs, split workspace).
+- [ ] Implement two-pane split (`left` + `right`) with draggable divider.
+- [ ] Implement focus modes: Zen mode and single-pane focus.
+- [ ] Expand UI store for active space, pane focus, split/focus flags, and per-space open tabs.
+- [ ] Add keyboard shortcuts for spaces, split toggle, and focus toggles.
+- [ ] Apply Arc neutral dark visual direction for shell/navigation surfaces.
+
+**Planned milestone:** Arc-style workspace shell on top of Slice 1 baseline (spaces, per-space pinned tabs, two-pane split, focus modes).
 
 ### Phase 2 — Multi-Provider & Model Switching (3–4 weeks)
 
@@ -470,11 +495,11 @@ Auto-detects running Ollama on localhost. Uses the same chat interface as cloud 
 
 **Milestone:** Full multi-provider support with seamless mid-conversation model switching.
 
-### Phase 3 — Split-Screen, Memory & Subscription Bridges (3–4 weeks)
+### Phase 3 — Advanced Workspace, Memory & Subscription Bridges (3–4 weeks)
 
-- [ ] Split-screen pane system with Zustand store
-- [ ] Draggable dividers, pane add/remove/reorder
-- [ ] Broadcast prompt to all panes
+- [ ] Advanced multi-pane workspace (3-4 panes) and grid variants
+- [ ] Broadcast prompt mode across active panes
+- [ ] Advanced pane orchestration (add/remove/reorder beyond two-pane slice)
 - [ ] Convex backend: schema, auth setup, deployment
 - [ ] User sign-up/login via Convex Auth
 - [ ] Memory system: CRUD, category tagging, system prompt injection
@@ -490,7 +515,7 @@ Auto-detects running Ollama on localhost. Uses the same chat interface as cloud 
 - [ ] "Experimental" badge and warning UI for subscription bridges
 - [ ] Graceful fallback: prompt user to switch to API key on bridge failure
 
-**Milestone:** Split-screen with cloud-synced personalization and experimental subscription bridges.
+**Milestone:** Advanced workspace + cloud-synced personalization and experimental subscription bridges.
 
 ### Phase 4 — Polish & Distribution (2–3 weeks)
 

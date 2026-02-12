@@ -1,5 +1,14 @@
 # Next Steps: Phase-1 Slice 1 (E2E Single-Provider Chat)
 
+## Status
+
+Completed baseline (shipped).
+
+## Follow-up Slice
+
+Arc workspace planning is tracked in:
+[`docs/phase1-slice2-arc-workspace-plan.md`](/Users/anthony/Documents/CS/Coding/entropy_chat/docs/phase1-slice2-arc-workspace-plan.md)
+
 ## Summary
 
 Build the first usable milestone on top of the bootstrap: OpenAI streaming chat with encrypted local key storage, SQLite-backed conversations/messages, and a minimal Tailwind + shadcn UI shell (sidebar + single thread).
