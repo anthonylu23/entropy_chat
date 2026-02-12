@@ -13,11 +13,19 @@ function createMainWindow(): void {
     minHeight: 640,
     show: false,
     webPreferences: {
-      preload: join(__dirname, '../preload/index.mjs'),
+      preload: join(__dirname, '../preload/index.cjs'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true
     }
+  })
+
+  mainWindow.webContents.on('preload-error', (_event, preloadPath, error) => {
+    console.error(`[preload-error] ${preloadPath}:`, error)
+  })
+
+  mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL) => {
+    console.error(`[did-fail-load] ${errorCode} ${errorDescription} (${validatedURL})`)
   })
 
   mainWindow.once('ready-to-show', () => {

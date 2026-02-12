@@ -1,81 +1,72 @@
-import { FormEvent, useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { getEntropyApi } from '@renderer/lib/ipc'
-import { APP_NAME } from '@shared/constants'
+import { AppShell } from '@renderer/components/layout/AppShell'
+import { ApiKeyCard } from '@renderer/components/settings/ApiKeyCard'
 
-const SETTINGS_KEY = 'smoke.key'
+type AppState = 'loading' | 'needs-key' | 'ready'
+const BRIDGE_RETRY_ATTEMPTS = 30
+const BRIDGE_RETRY_DELAY_MS = 100
 
-export default function App(): JSX.Element {
-  const [pingStatus, setPingStatus] = useState('loading...')
-  const [valueInput, setValueInput] = useState('')
-  const [storedValue, setStoredValue] = useState<string | null>(null)
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+export default function App() {
+  const [appState, setAppState] = useState<AppState>('loading')
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const entropy = getEntropyApi()
+  const checkKey = useCallback(async () => {
+    let entropy = getEntropyApi()
+    for (let attempt = 0; !entropy && attempt < BRIDGE_RETRY_ATTEMPTS; attempt += 1) {
+      await sleep(BRIDGE_RETRY_DELAY_MS)
+      entropy = getEntropyApi()
+    }
     if (!entropy) {
-      setError('Preload bridge not available')
+      setError(
+        'Preload bridge not available. Make sure the app is launched through Electron (bun run dev / bun run preview).'
+      )
       return
     }
-
-    void entropy.system
-      .ping()
-      .then(setPingStatus)
-      .catch((err: unknown) => {
-        setError(err instanceof Error ? err.message : 'Failed to ping main process')
-      })
-
-    void entropy.settings
-      .get(SETTINGS_KEY)
-      .then((value) => {
-        setStoredValue(value)
-        setValueInput(value ?? '')
-      })
-      .catch((err: unknown) => {
-        setError(err instanceof Error ? err.message : 'Failed to read setting')
-      })
+    try {
+      const hasKey = await entropy.credentials.hasOpenAIKey()
+      setAppState(hasKey ? 'ready' : 'needs-key')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to check API key')
+      setAppState('needs-key')
+    }
   }, [])
 
-  const onSave = async (event: FormEvent) => {
-    event.preventDefault()
-    const entropy = getEntropyApi()
-    if (!entropy) {
-      setError('Preload bridge not available')
-      return
-    }
+  useEffect(() => {
+    void checkKey()
+  }, [checkKey])
 
-    setError(null)
-    try {
-      await entropy.settings.set(SETTINGS_KEY, valueInput)
-      const refreshedValue = await entropy.settings.get(SETTINGS_KEY)
-      setStoredValue(refreshedValue)
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Failed to save setting')
-    }
+  const handleKeySaved = useCallback(() => {
+    setAppState('ready')
+  }, [])
+
+  if (error && appState === 'loading') {
+    return (
+      <main className="flex min-h-screen items-center justify-center p-8">
+        <p className="text-sm text-destructive">{error}</p>
+      </main>
+    )
   }
 
-  return (
-    <main className="app">
-      <section className="card">
-        <h1>{APP_NAME} Foundation</h1>
-        <p className="muted">System ping: {pingStatus}</p>
-      </section>
+  if (appState === 'loading') {
+    return (
+      <main className="flex min-h-screen items-center justify-center">
+        <p className="text-sm text-muted-foreground">Loading...</p>
+      </main>
+    )
+  }
 
-      <section className="card">
-        <h2>IPC Settings Smoke Test</h2>
-        <form onSubmit={onSave}>
-          <label htmlFor="settingsValue">Value</label>
-          <input
-            id="settingsValue"
-            value={valueInput}
-            onChange={(event) => setValueInput(event.target.value)}
-            placeholder="Enter any value"
-          />
-          <button type="submit">Save and Reload</button>
-        </form>
-        <p className="muted">Stored value: {storedValue ?? '(null)'}</p>
-      </section>
+  if (appState === 'needs-key') {
+    return (
+      <main className="flex min-h-screen items-center justify-center p-8">
+        <ApiKeyCard onKeySaved={handleKeySaved} />
+      </main>
+    )
+  }
 
-      {error ? <p className="error">Error: {error}</p> : null}
-    </main>
-  )
+  return <AppShell />
 }

@@ -6,3 +6,11 @@ export function getEntropyApi(): EntropyApi | null {
   }
   return window.entropy ?? null
 }
+
+export function requireEntropyApi(): EntropyApi {
+  const api = getEntropyApi()
+  if (!api) {
+    throw new Error('Preload bridge not available')
+  }
+  return api
+}

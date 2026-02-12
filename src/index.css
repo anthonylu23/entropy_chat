@@ -1,0 +1,65 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Warm / glass dark theme mapped from existing styles.css */
+    --background: 210 6% 18%;       /* #2b2c2d base */
+    --foreground: 28 8% 90%;        /* #e8e5e2 */
+
+    --card: 230 20% 10%;            /* glass card fill */
+    --card-foreground: 28 8% 90%;
+
+    --primary: 174 100% 36%;        /* #00b8a9 accent */
+    --primary-foreground: 220 16% 10%;
+
+    --secondary: 210 4% 28%;        /* subtle surface */
+    --secondary-foreground: 28 8% 90%;
+
+    --muted: 210 4% 24%;
+    --muted-foreground: 28 5% 72%;  /* #b8b5b2 */
+
+    --accent: 174 100% 36%;
+    --accent-foreground: 220 16% 10%;
+
+    --destructive: 0 100% 76%;      /* #ff8383 */
+    --destructive-foreground: 220 16% 10%;
+
+    --border: 0 0% 100% / 0.2;
+    --input: 0 0% 100% / 0.28;
+    --ring: 174 100% 36%;
+
+    --radius: 0.75rem;
+  }
+
+  * {
+    @apply box-border border-border;
+  }
+
+  body {
+    @apply m-0 bg-background font-mono text-foreground antialiased;
+    background: radial-gradient(
+      circle at top right,
+      #4c4d4d,
+      #3a3b3b 45%,
+      #2b2c2d
+    );
+  }
+}
+
+/* Glass card utility matching original .card style */
+@layer components {
+  .glass-card {
+    @apply rounded-lg border border-border p-4;
+    background: linear-gradient(
+      145deg,
+      rgba(20, 22, 30, 0.55),
+      rgba(255, 255, 255, 0.08)
+    );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+      0 12px 32px rgba(3, 7, 18, 0.7);
+  }
+}
