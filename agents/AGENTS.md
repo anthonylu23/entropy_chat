@@ -14,3 +14,5 @@ Before making changes, take a look at what changes have been so you have proper 
 If new changes shouldn't be pushed to main, let me (the human) know if I should branch, unstage, etc.
 
 Approvals is not needed for web search, feel free to use web search when necessary.
+
+When dividing tasks for agents, ensure tasks are atomic. Parallel agents are being used (two for now), and I won't be using worktrees.
