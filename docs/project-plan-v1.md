@@ -443,18 +443,27 @@ Auto-detects running Ollama on localhost. Uses the same chat interface as cloud 
 
 ## Development Phases
 
+Atomicity rule: each checklist item is one independently assignable task with one primary output.
+
 ### Phase 1 — Foundation (2–3 weeks)
 
 Status: shipped (Slice 1 baseline).
 
-- [x] Scaffold Electron + Vite + React with TypeScript (use `electron-vite`)
-- [x] Set up preload script with typed IPC bridge
-- [x] Integrate `better-sqlite3`, define schema, write migrations
-- [x] Build basic chat UI: single thread, message list, input bar (shadcn/ui)
-- [x] Implement first provider (OpenAI) via Vercel AI SDK with streaming
-- [x] Settings panel for API key input, encrypted storage via safeStorage
-- [x] Conversation persistence: save/load threads from SQLite
-- [x] Basic sidebar with conversation list
+- [x] `P1-01` Scaffold Electron + Vite + React with TypeScript (`electron-vite`).
+- [x] `P1-02` Set up preload script with typed IPC bridge.
+- [x] `P1-03` Integrate `better-sqlite3`.
+- [x] `P1-04` Define initial SQLite schema.
+- [x] `P1-05` Implement migration runner.
+- [x] `P1-06` Build single-thread chat view.
+- [x] `P1-07` Build message list UI.
+- [x] `P1-08` Build message input UI.
+- [x] `P1-09` Implement OpenAI provider path via Vercel AI SDK.
+- [x] `P1-10` Implement streaming responses to renderer.
+- [x] `P1-11` Add settings panel for API key input.
+- [x] `P1-12` Encrypt API key with `safeStorage`.
+- [x] `P1-13` Persist conversations to SQLite.
+- [x] `P1-14` Load persisted conversations from SQLite.
+- [x] `P1-15` Add sidebar conversation list.
 
 **Milestone:** Working single-provider chat app with encrypted local key storage.
 
@@ -464,70 +473,127 @@ Status: planned.
 
 Detailed plan: [`docs/phase1-slice2-arc-workspace-plan.md`](/Users/anthony/Documents/CS/Coding/entropy_chat/docs/phase1-slice2-arc-workspace-plan.md)
 
-- [ ] Add SQLite migration for spaces and conversation space assignment.
-- [ ] Add `spaces.*` IPC/preload API (`list`, `create`, `update`, `reorder`).
-- [ ] Extend `conversations.*` with `create(spaceId)`, `pin`, `reorderPinned`, `moveToSpace`.
-- [ ] Add planned `ConversationSummary` fields: `spaceId`, `pinnedOrder`.
-- [ ] Refactor shell into Arc-style workspace (spaces rail, sidebar, pinned tabs, split workspace).
-- [ ] Implement two-pane split (`left` + `right`) with draggable divider.
-- [ ] Implement focus modes: Zen mode and single-pane focus.
-- [ ] Expand UI store for active space, pane focus, split/focus flags, and per-space open tabs.
-- [ ] Add keyboard shortcuts for spaces, split toggle, and focus toggles.
-- [ ] Apply Arc neutral dark visual direction for shell/navigation surfaces.
+Parallel execution matrix (1 orchestrator + 2 coders): [`docs/phase1-slice2-parallel-execution-matrix.md`](/Users/anthony/Documents/CS/Coding/entropy_chat/docs/phase1-slice2-parallel-execution-matrix.md)
+
+- [ ] `P1S2-01` Add SQLite migration file for spaces schema.
+- [ ] `P1S2-02` Backfill existing conversations with default `space_id`.
+- [ ] `P1S2-03` Add `spaces.list` IPC + preload API.
+- [ ] `P1S2-04` Add `spaces.create` IPC + preload API.
+- [ ] `P1S2-05` Add `spaces.update` IPC + preload API.
+- [ ] `P1S2-06` Add `spaces.reorder` IPC + preload API.
+- [ ] `P1S2-07` Add `conversations.create(...spaceId)` API support.
+- [ ] `P1S2-08` Add `conversations.pin` API support.
+- [ ] `P1S2-09` Add `conversations.reorderPinned` API support.
+- [ ] `P1S2-10` Add `conversations.moveToSpace` API support.
+- [ ] `P1S2-11` Add `ConversationSummary.spaceId`.
+- [ ] `P1S2-12` Add `ConversationSummary.pinnedOrder`.
+- [ ] `P1S2-13` Add Arc workspace shell container.
+- [ ] `P1S2-14` Add spaces rail UI.
+- [ ] `P1S2-15` Add per-space sidebar UI.
+- [ ] `P1S2-16` Add per-space pinned tab strip UI.
+- [ ] `P1S2-17` Add two-pane split workspace UI.
+- [ ] `P1S2-18` Add draggable split divider behavior.
+- [ ] `P1S2-19` Add Zen mode toggle behavior.
+- [ ] `P1S2-20` Add single-pane focus toggle behavior.
+- [ ] `P1S2-21` Add workspace state fields to UI store.
+- [ ] `P1S2-22` Persist workspace layout settings.
+- [ ] `P1S2-23` Add keyboard shortcuts for spaces and focus/split toggles.
+- [ ] `P1S2-24` Apply Arc neutral dark styling to shell navigation surfaces.
 
 **Planned milestone:** Arc-style workspace shell on top of Slice 1 baseline (spaces, per-space pinned tabs, two-pane split, focus modes).
 
 ### Phase 2 — Multi-Provider & Model Switching (3–4 weeks)
 
-- [ ] Add Anthropic, Gemini, and Ollama provider adapters (Tier 1 — API key)
-- [ ] Build provider registry with auth tier awareness
-- [ ] Build model selector component with provider grouping
-- [ ] Implement in-context model switching with message history re-serialization
-- [ ] GitHub Copilot OAuth device flow (Tier 2)
-- [ ] Token usage tracking per message and per provider
-- [ ] Conversation search and filtering
-- [ ] Keyboard shortcuts: `Cmd+K` model switch, `Cmd+N` new chat, `Cmd+,` settings
-- [ ] Implement core design system: CSS variables, glassmorphism utilities, IBM Plex Mono
-- [ ] Configure Tailwind with design tokens (colors, shadows, radii)
-- [ ] Theme engine: JSON loader, `:root` variable injection, dark/light defaults
-- [ ] Theme selector in settings with live preview
-- [ ] Persist theme choice in SQLite, respect system dark/light preference as default
+- [ ] `P2-01` Add Anthropic adapter (Tier 1 API key path).
+- [ ] `P2-02` Add Gemini adapter (Tier 1 API key path).
+- [ ] `P2-03` Add Ollama adapter (Tier 1 local path).
+- [ ] `P2-04` Add provider registry metadata for auth tiers.
+- [ ] `P2-05` Add provider capability metadata for model features.
+- [ ] `P2-06` Build model selector UI with provider grouping.
+- [ ] `P2-07` Implement model selection persistence per conversation.
+- [ ] `P2-08` Implement message-history re-serialization for model switches.
+- [ ] `P2-09` Implement GitHub Copilot OAuth device-code start flow.
+- [ ] `P2-10` Implement GitHub Copilot OAuth token polling + storage.
+- [ ] `P2-11` Implement Copilot token refresh handling.
+- [ ] `P2-12` Record token usage for each assistant message.
+- [ ] `P2-13` Add provider-level token usage aggregation.
+- [ ] `P2-14` Add conversation search by title/content metadata.
+- [ ] `P2-15` Add conversation filtering by provider/model.
+- [ ] `P2-16` Add `Cmd+K` model switch shortcut.
+- [ ] `P2-17` Add `Cmd+N` new chat shortcut.
+- [ ] `P2-18` Add `Cmd+,` settings shortcut.
+- [ ] `P2-19` Define CSS variable tokens for design system.
+- [ ] `P2-20` Add reusable glassmorphism utility classes.
+- [ ] `P2-21` Configure IBM Plex Mono typography tokens.
+- [ ] `P2-22` Wire Tailwind config to design tokens (colors, shadows, radii).
+- [ ] `P2-23` Implement theme JSON loader.
+- [ ] `P2-24` Implement runtime `:root` variable injection.
+- [ ] `P2-25` Provide dark/light default theme selection.
+- [ ] `P2-26` Add theme selector UI with live preview.
+- [ ] `P2-27` Persist theme choice in SQLite.
+- [ ] `P2-28` Respect system dark/light preference when no explicit theme is saved.
 
 **Milestone:** Full multi-provider support with seamless mid-conversation model switching.
 
 ### Phase 3 — Advanced Workspace, Memory & Subscription Bridges (3–4 weeks)
 
-- [ ] Advanced multi-pane workspace (3-4 panes) and grid variants
-- [ ] Broadcast prompt mode across active panes
-- [ ] Advanced pane orchestration (add/remove/reorder beyond two-pane slice)
-- [ ] Convex backend: schema, auth setup, deployment
-- [ ] User sign-up/login via Convex Auth
-- [ ] Memory system: CRUD, category tagging, system prompt injection
-- [ ] Preference sync across devices
-- [ ] Memory management UI (view, edit, delete memories)
-- [ ] ChatGPT Plus subscription bridge (Tier 3 — experimental)
-  - [ ] Embedded webview login flow
-  - [ ] Session token extraction and encrypted storage
-  - [ ] Internal API endpoint proxy
-  - [ ] Auto-refresh and expiry detection
-- [ ] Claude Pro subscription bridge (Tier 3 — experimental)
-  - [ ] Same flow as ChatGPT Plus, targeting claude.ai
-- [ ] "Experimental" badge and warning UI for subscription bridges
-- [ ] Graceful fallback: prompt user to switch to API key on bridge failure
+- [ ] `P3-01` Add 3-pane workspace layout support.
+- [ ] `P3-02` Add 4-pane workspace layout support.
+- [ ] `P3-03` Add grid layout variants for multi-pane mode.
+- [ ] `P3-04` Add broadcast prompt dispatch to all active panes.
+- [ ] `P3-05` Add pane create/remove actions.
+- [ ] `P3-06` Add pane reorder actions.
+- [ ] `P3-07` Define Convex schema for auth + memory + sync.
+- [ ] `P3-08` Configure Convex auth providers and deployment settings.
+- [ ] `P3-09` Deploy Convex backend for production environment.
+- [ ] `P3-10` Implement user sign-up flow via Convex Auth.
+- [ ] `P3-11` Implement user login flow via Convex Auth.
+- [ ] `P3-12` Implement memory create operation.
+- [ ] `P3-13` Implement memory read/list operations.
+- [ ] `P3-14` Implement memory update operation.
+- [ ] `P3-15` Implement memory delete operation.
+- [ ] `P3-16` Add memory category tagging support.
+- [ ] `P3-17` Inject approved memory entries into system prompt assembly.
+- [ ] `P3-18` Sync user preferences across devices.
+- [ ] `P3-19` Build memory management UI list view.
+- [ ] `P3-20` Build memory edit UI flow.
+- [ ] `P3-21` Build memory delete UI flow.
+- [ ] `P3-22` Build ChatGPT Plus embedded webview login flow (experimental).
+- [ ] `P3-23` Implement ChatGPT Plus session token capture + encrypted storage (experimental).
+- [ ] `P3-24` Implement ChatGPT Plus internal endpoint proxying (experimental).
+- [ ] `P3-25` Implement ChatGPT Plus token refresh + expiry detection (experimental).
+- [ ] `P3-26` Build Claude Pro embedded webview login flow (experimental).
+- [ ] `P3-27` Implement Claude Pro session token capture + encrypted storage (experimental).
+- [ ] `P3-28` Implement Claude Pro internal endpoint proxying (experimental).
+- [ ] `P3-29` Implement Claude Pro token refresh + expiry detection (experimental).
+- [ ] `P3-30` Add subscription-bridge experimental badge UI.
+- [ ] `P3-31` Add subscription-bridge warning copy + consent affordance.
+- [ ] `P3-32` Add fallback prompt to switch from bridge auth to API key auth on failure.
 
 **Milestone:** Advanced workspace + cloud-synced personalization and experimental subscription bridges.
 
 ### Phase 4 — Polish & Distribution (2–3 weeks)
 
-- [ ] Auto-updates via `electron-updater` + GitHub Releases
-- [ ] System tray with minimize-to-tray
-- [ ] Conversation export (Markdown, JSON)
-- [ ] Performance audit: code splitting, lazy-load panes, startup time
-- [ ] Cross-platform builds and testing (macOS, Windows, Linux)
-- [ ] Packaging with `electron-builder` (DMG, NSIS, AppImage)
-- [ ] Custom theme import (user `.json` theme files)
-- [ ] Theme editor with live preview (stretch goal)
-- [ ] README, docs, landing page
+- [ ] `P4-01` Integrate `electron-updater` into desktop app lifecycle.
+- [ ] `P4-02` Configure GitHub Releases channel for update distribution.
+- [ ] `P4-03` Add system tray icon and menu actions.
+- [ ] `P4-04` Add minimize-to-tray behavior.
+- [ ] `P4-05` Implement conversation export as Markdown.
+- [ ] `P4-06` Implement conversation export as JSON.
+- [ ] `P4-07` Audit bundle code splitting opportunities.
+- [ ] `P4-08` Implement lazy-loading for heavy pane/workspace modules.
+- [ ] `P4-09` Measure and report startup-time baseline + post-optimization delta.
+- [ ] `P4-10` Run macOS build + smoke test pass.
+- [ ] `P4-11` Run Windows build + smoke test pass.
+- [ ] `P4-12` Run Linux build + smoke test pass.
+- [ ] `P4-13` Configure `electron-builder` DMG target.
+- [ ] `P4-14` Configure `electron-builder` NSIS target.
+- [ ] `P4-15` Configure `electron-builder` AppImage target.
+- [ ] `P4-16` Add custom theme import from user `.json` files.
+- [ ] `P4-17` Build theme editor with live preview (stretch goal).
+- [ ] `P4-18` Update README for production workflows.
+- [ ] `P4-19` Update technical docs for release/distribution workflows.
+- [ ] `P4-20` Publish landing page content and deployment.
 
 **Milestone:** Production-ready builds with auto-updates.
 

@@ -9,6 +9,9 @@ Completed baseline (shipped).
 Arc workspace planning is tracked in:
 [`docs/phase1-slice2-arc-workspace-plan.md`](/Users/anthony/Documents/CS/Coding/entropy_chat/docs/phase1-slice2-arc-workspace-plan.md)
 
+Parallel execution matrix for the Slice 2 build:
+[`docs/phase1-slice2-parallel-execution-matrix.md`](/Users/anthony/Documents/CS/Coding/entropy_chat/docs/phase1-slice2-parallel-execution-matrix.md)
+
 ## Summary
 
 Build the first usable milestone on top of the bootstrap: OpenAI streaming chat with encrypted local key storage, SQLite-backed conversations/messages, and a minimal Tailwind + shadcn UI shell (sidebar + single thread).
@@ -33,111 +36,120 @@ This slice targets the Phase-1 milestone: a working single-provider desktop chat
 
 ## Implementation Plan (Decision Complete)
 
+Atomicity rule: each checklist line is one independently shippable task with one primary outcome.
+
 ### 1. Stabilize baseline + dependencies
 
-- Add runtime deps: `better-sqlite3`, `ai`, `@ai-sdk/openai`, `zod`, `zustand`, `@tanstack/react-query`.
-- Add UI deps: `tailwindcss`, `postcss`, `autoprefixer`, `class-variance-authority`, `clsx`, `tailwind-merge`, `lucide-react`, `tailwindcss-animate`.
-- Add native rebuild tooling for Electron ABI: `@electron/rebuild`.
-- Add scripts in `/Users/anthony/Documents/CS/Coding/entropy_chat/package.json`:
-  - `postinstall`: rebuild `better-sqlite3` for Electron
-  - keep existing `dev/build/typecheck/preview`.
+- [x] `S1-DEP-01` Add runtime dependency `better-sqlite3`.
+- [x] `S1-DEP-02` Add runtime dependency `ai`.
+- [x] `S1-DEP-03` Add runtime dependency `@ai-sdk/openai`.
+- [x] `S1-DEP-04` Add runtime dependency `zod`.
+- [x] `S1-DEP-05` Add runtime dependency `zustand`.
+- [x] `S1-DEP-06` Add runtime dependency `@tanstack/react-query`.
+- [x] `S1-DEP-07` Add UI dependency `tailwindcss`.
+- [x] `S1-DEP-08` Add UI dependency `postcss`.
+- [x] `S1-DEP-09` Add UI dependency `autoprefixer`.
+- [x] `S1-DEP-10` Add UI dependency `class-variance-authority`.
+- [x] `S1-DEP-11` Add UI dependency `clsx`.
+- [x] `S1-DEP-12` Add UI dependency `tailwind-merge`.
+- [x] `S1-DEP-13` Add UI dependency `lucide-react`.
+- [x] `S1-DEP-14` Add UI dependency `tailwindcss-animate`.
+- [x] `S1-DEP-15` Add native rebuild tooling `@electron/rebuild`.
+- [x] `S1-DEP-16` Add `postinstall` script to rebuild `better-sqlite3` for Electron.
+- [x] `S1-DEP-17` Preserve existing `dev/build/typecheck/preview` scripts in `package.json`.
 
 ### 2. Tailwind + shadcn foundation
 
-- Create and wire:
-  - `/Users/anthony/Documents/CS/Coding/entropy_chat/tailwind.config.ts`
-  - `/Users/anthony/Documents/CS/Coding/entropy_chat/postcss.config.cjs`
-  - `/Users/anthony/Documents/CS/Coding/entropy_chat/src/index.css`
-  - `/Users/anthony/Documents/CS/Coding/entropy_chat/src/lib/utils.ts`
-- Add initial shadcn primitives used in this slice only:
-  - `Button`, `Input`, `Textarea`, `Card`, `ScrollArea`.
-- Keep current warm/glass token direction; migrate existing `/Users/anthony/Documents/CS/Coding/entropy_chat/src/styles.css` styles into Tailwind tokenized classes.
+- [x] `S1-UI-01` Create and wire `tailwind.config.ts`.
+- [x] `S1-UI-02` Create and wire `postcss.config.cjs`.
+- [x] `S1-UI-03` Create and wire `src/index.css`.
+- [x] `S1-UI-04` Create `src/lib/utils.ts`.
+- [x] `S1-UI-05` Add shadcn `Button` primitive.
+- [x] `S1-UI-06` Add shadcn `Input` primitive.
+- [x] `S1-UI-07` Add shadcn `Textarea` primitive.
+- [x] `S1-UI-08` Add shadcn `Card` primitive.
+- [x] `S1-UI-09` Add shadcn `ScrollArea` primitive.
+- [x] `S1-UI-10` Migrate existing `src/styles.css` styles to Tailwind tokenized classes while preserving warm/glass direction.
 
 ### 3. SQLite core + migrations
 
-- Implement DB bootstrap in:
-  - `/Users/anthony/Documents/CS/Coding/entropy_chat/electron/db/bootstrap.ts`
-  - `/Users/anthony/Documents/CS/Coding/entropy_chat/electron/db/schema.ts`
-  - `/Users/anthony/Documents/CS/Coding/entropy_chat/electron/db/migrations/001_init.sql`
-- Tables for this slice:
-  - `providers` (OpenAI key only for now)
-  - `conversations`
-  - `messages`
-  - `settings`
-- Add migration journal table (`schema_migrations`) and idempotent startup migration runner.
+- [x] `S1-DB-01` Implement DB bootstrap in `electron/db/bootstrap.ts`.
+- [x] `S1-DB-02` Implement schema registration in `electron/db/schema.ts`.
+- [x] `S1-DB-03` Add `electron/db/migrations/001_init.sql`.
+- [x] `S1-DB-04` Create `providers` table.
+- [x] `S1-DB-05` Create `conversations` table.
+- [x] `S1-DB-06` Create `messages` table.
+- [x] `S1-DB-07` Create `settings` table.
+- [x] `S1-DB-08` Create `schema_migrations` journal table.
+- [x] `S1-DB-09` Implement idempotent startup migration runner.
 
 ### 4. Credential encryption + storage
 
-- Implement real encryption in:
-  - `/Users/anthony/Documents/CS/Coding/entropy_chat/electron/db/keystore.ts`
-- Use `safeStorage.encryptString/decryptString`.
-- Store encrypted OpenAI key blob in `providers.credentials_encrypted`.
-- Fail with explicit error when OS-level `safeStorage` unavailable.
+- [x] `S1-SEC-01` Implement key encryption utilities in `electron/db/keystore.ts`.
+- [x] `S1-SEC-02` Encrypt API keys with `safeStorage.encryptString`.
+- [x] `S1-SEC-03` Decrypt API keys with `safeStorage.decryptString`.
+- [x] `S1-SEC-04` Store encrypted OpenAI key blob in `providers.credentials_encrypted`.
+- [x] `S1-SEC-05` Return explicit error when OS `safeStorage` is unavailable.
 
 ### 5. IPC contracts expansion
 
-- Extend shared contracts:
-  - `/Users/anthony/Documents/CS/Coding/entropy_chat/shared/types.ts`
-  - `/Users/anthony/Documents/CS/Coding/entropy_chat/shared/validators.ts`
-- Add typed channels and payloads for:
-  - `credentials.hasOpenAIKey`
-  - `credentials.setOpenAIKey`
-  - `conversations.list`
-  - `conversations.create`
-  - `messages.listByConversation`
-  - `chat.stream.start`
-  - `chat.stream.cancel`
-- Add streaming event contracts:
-  - `chat.stream.delta`
-  - `chat.stream.done`
-  - `chat.stream.error`
+- [x] `S1-IPC-01` Add `credentials.hasOpenAIKey` contract in `shared/types.ts`.
+- [x] `S1-IPC-02` Add `credentials.setOpenAIKey` contract in `shared/types.ts`.
+- [x] `S1-IPC-03` Add `conversations.list` contract in `shared/types.ts`.
+- [x] `S1-IPC-04` Add `conversations.create` contract in `shared/types.ts`.
+- [x] `S1-IPC-05` Add `messages.listByConversation` contract in `shared/types.ts`.
+- [x] `S1-IPC-06` Add `chat.stream.start` contract in `shared/types.ts`.
+- [x] `S1-IPC-07` Add `chat.stream.cancel` contract in `shared/types.ts`.
+- [x] `S1-IPC-08` Add `chat.stream.delta` event contract in `shared/types.ts`.
+- [x] `S1-IPC-09` Add `chat.stream.done` event contract in `shared/types.ts`.
+- [x] `S1-IPC-10` Add `chat.stream.error` event contract in `shared/types.ts`.
+- [x] `S1-IPC-11` Add validators for new payloads in `shared/validators.ts`.
 
 ### 6. Main-process handlers
 
-- Implement handlers in:
-  - `/Users/anthony/Documents/CS/Coding/entropy_chat/electron/ipc/auth.ts` (OpenAI key set/check)
-  - `/Users/anthony/Documents/CS/Coding/entropy_chat/electron/ipc/db.ts` (conversation/message reads/writes)
-  - `/Users/anthony/Documents/CS/Coding/entropy_chat/electron/ipc/providers.ts` (OpenAI stream orchestration)
-- Keep renderer isolated; all provider traffic stays in main process.
-- Persist user message immediately; stream assistant deltas; persist final assistant message on completion.
+- [x] `S1-MAIN-01` Implement OpenAI key set/check handlers in `electron/ipc/auth.ts`.
+- [x] `S1-MAIN-02` Implement conversation read/write handlers in `electron/ipc/db.ts`.
+- [x] `S1-MAIN-03` Implement message read/write handlers in `electron/ipc/db.ts`.
+- [x] `S1-MAIN-04` Implement OpenAI stream orchestration in `electron/ipc/providers.ts`.
+- [x] `S1-MAIN-05` Keep provider network calls in main process only.
+- [x] `S1-MAIN-06` Persist user message before starting stream.
+- [x] `S1-MAIN-07` Emit streaming assistant deltas during generation.
+- [x] `S1-MAIN-08` Persist final assistant message when stream completes.
 
 ### 7. Preload API update
 
-- Expand `/Users/anthony/Documents/CS/Coding/entropy_chat/electron/preload.ts` to expose:
-  - credential methods
-  - conversation/message methods
-  - stream start/cancel
-  - stream event subscribe/unsubscribe APIs
-- Update `/Users/anthony/Documents/CS/Coding/entropy_chat/src/vite-env.d.ts` and typed renderer client.
+- [x] `S1-PRE-01` Expose credential APIs in `electron/preload.ts`.
+- [x] `S1-PRE-02` Expose conversation/message APIs in `electron/preload.ts`.
+- [x] `S1-PRE-03` Expose stream start/cancel APIs in `electron/preload.ts`.
+- [x] `S1-PRE-04` Expose stream event subscribe/unsubscribe APIs in `electron/preload.ts`.
+- [x] `S1-PRE-05` Update `src/vite-env.d.ts` for new `window.entropy` types.
+- [x] `S1-PRE-06` Update typed renderer IPC client to match preload surface.
 
 ### 8. Renderer MVP chat UI
 
-- Replace smoke UI with minimal app shell:
-  - `/Users/anthony/Documents/CS/Coding/entropy_chat/src/App.tsx`
-  - `/Users/anthony/Documents/CS/Coding/entropy_chat/src/components/layout/*`
-  - `/Users/anthony/Documents/CS/Coding/entropy_chat/src/components/chat/*`
-  - `/Users/anthony/Documents/CS/Coding/entropy_chat/src/components/settings/*`
-- UX flow:
-  - If no key: show settings card for OpenAI key entry.
-  - If key exists: show sidebar + active conversation.
-  - Send prompt => stream assistant text token-by-token into active thread.
-  - New chat creates conversation row and switches context.
+- [x] `S1-REN-01` Replace smoke UI in `src/App.tsx` with app shell entry.
+- [x] `S1-REN-02` Build layout shell components in `src/components/layout/*`.
+- [x] `S1-REN-03` Build chat components in `src/components/chat/*`.
+- [x] `S1-REN-04` Build settings components in `src/components/settings/*`.
+- [x] `S1-REN-05` Show OpenAI key entry when no key is configured.
+- [x] `S1-REN-06` Show sidebar + active conversation when key exists.
+- [x] `S1-REN-07` Stream assistant text token-by-token into active thread.
+- [x] `S1-REN-08` Create and switch to new conversation on "new chat".
 
 ### 9. State + query wiring
 
-- Add lightweight stores/hooks:
-  - `/Users/anthony/Documents/CS/Coding/entropy_chat/src/stores/uiStore.ts`
-  - `/Users/anthony/Documents/CS/Coding/entropy_chat/src/hooks/useConversations.ts`
-  - `/Users/anthony/Documents/CS/Coding/entropy_chat/src/hooks/useChatStream.ts`
-- Use TanStack Query for list/message loading and invalidation; keep stream buffer in local component/store state.
+- [x] `S1-STATE-01` Add UI state in `src/stores/uiStore.ts`.
+- [x] `S1-STATE-02` Add conversation loading hook in `src/hooks/useConversations.ts`.
+- [x] `S1-STATE-03` Add stream orchestration hook in `src/hooks/useChatStream.ts`.
+- [x] `S1-STATE-04` Use TanStack Query for conversation/message reads and invalidation.
+- [x] `S1-STATE-05` Keep in-flight stream buffer in local component/store state.
 
 ### 10. Docs + completion gate
 
-- Update `/Users/anthony/Documents/CS/Coding/entropy_chat/README.md` with:
-  - OpenAI key setup
-  - native module rebuild note
-  - run and verification steps
-- Mark completed Phase-1 items in `/Users/anthony/Documents/CS/Coding/entropy_chat/project_plan.md` only for work actually shipped in this slice.
+- [x] `S1-DOC-01` Update `README.md` with OpenAI key setup instructions.
+- [x] `S1-DOC-02` Document native module rebuild note in `README.md`.
+- [x] `S1-DOC-03` Add run + verification steps to `README.md`.
+- [x] `S1-DOC-04` Mark shipped Slice 1 roadmap items as complete in project planning docs.
 
 ## Public APIs / Interfaces (Additions)
 
