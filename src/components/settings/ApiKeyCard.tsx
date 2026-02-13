@@ -16,7 +16,12 @@ export function ApiKeyCard({ onKeySaved }: ApiKeyCardProps) {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     const entropy = getEntropyApi()
-    if (!entropy) return
+    if (!entropy) {
+      setError(
+        'Preload bridge not available. Make sure the app is launched through Electron (bun run dev / bun run preview).'
+      )
+      return
+    }
 
     setSaving(true)
     setError(null)

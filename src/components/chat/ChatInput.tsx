@@ -4,7 +4,7 @@ import { Button } from '@renderer/components/ui/button'
 import { Send, Square } from 'lucide-react'
 
 interface ChatInputProps {
-  onSend: (message: string) => void
+  onSend: (message: string) => boolean | Promise<boolean>
   onCancel: () => void
   isStreaming: boolean
 }
@@ -12,18 +12,24 @@ interface ChatInputProps {
 export function ChatInput({ onSend, onCancel, isStreaming }: ChatInputProps) {
   const [value, setValue] = useState('')
 
-  const handleSend = useCallback(() => {
+  const handleSend = useCallback(async () => {
     const trimmed = value.trim()
     if (!trimmed || isStreaming) return
-    onSend(trimmed)
-    setValue('')
+    try {
+      const sent = await onSend(trimmed)
+      if (sent) {
+        setValue('')
+      }
+    } catch {
+      // Errors are surfaced by the parent chat stream hook.
+    }
   }, [value, isStreaming, onSend])
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLTextAreaElement>) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault()
-        handleSend()
+        void handleSend()
       }
     },
     [handleSend]
@@ -53,7 +59,9 @@ export function ChatInput({ onSend, onCancel, isStreaming }: ChatInputProps) {
         ) : (
           <Button
             size="icon"
-            onClick={handleSend}
+            onClick={() => {
+              void handleSend()
+            }}
             disabled={value.trim().length === 0}
             className="shrink-0 self-end"
           >

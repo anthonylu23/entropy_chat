@@ -20,7 +20,7 @@ export function ChatView({ conversationId }: ChatViewProps) {
 
   const handleSend = (message: string) => {
     clearError()
-    void sendMessage(message)
+    return sendMessage(message)
   }
 
   const handleCancel = () => {

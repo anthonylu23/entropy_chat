@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { requireEntropyApi } from '@renderer/lib/ipc'
-import type { ChatStreamStartInput, Unsubscribe } from '@shared/types'
+import type { ChatMessage, ChatStreamStartInput, Unsubscribe } from '@shared/types'
 import { QUERY_KEYS } from '@renderer/hooks/useConversations'
 
 interface ChatStreamState {
@@ -27,6 +27,8 @@ export function useChatStream(conversationId: string | null) {
   })
 
   const activeStream = useRef<ActiveStreamRef | null>(null)
+  const startInFlight = useRef(false)
+  const startingConversationId = useRef<string | null>(null)
   const currentConversationId = useRef<string | null>(conversationId)
   const unsubscribes = useRef<Unsubscribe[]>([])
 
@@ -36,7 +38,9 @@ export function useChatStream(conversationId: string | null) {
       ...prev,
       streamingContent: '',
       error: null,
-      isStreaming: activeStream.current?.conversationId === conversationId,
+      isStreaming:
+        activeStream.current?.conversationId === conversationId ||
+        startingConversationId.current === conversationId,
     }))
   }, [conversationId])
 
@@ -99,41 +103,74 @@ export function useChatStream(conversationId: string | null) {
   }, [queryClient])
 
   const sendMessage = useCallback(
-    async (message: string, model?: string) => {
+    async (message: string, model?: string): Promise<boolean> => {
       if (!conversationId) {
-        return
+        return false
       }
-      if (activeStream.current) {
+      if (activeStream.current || startInFlight.current) {
         setState((prev) => ({
           ...prev,
           error: 'A response is already in progress for another message.',
         }))
-        return
+        return false
       }
+
+      const trimmedMessage = message.trim()
+      if (!trimmedMessage) {
+        return false
+      }
+
+      const optimisticMessageId = `optimistic-user-${Date.now()}`
+      const optimisticMessage: ChatMessage = {
+        id: optimisticMessageId,
+        conversationId,
+        role: 'user',
+        content: trimmedMessage,
+        model: model ?? null,
+        tokensUsed: null,
+        createdAt: new Date().toISOString(),
+      }
+
+      queryClient.setQueryData<ChatMessage[]>(QUERY_KEYS.messages(conversationId), (prev = []) => [
+        ...prev,
+        optimisticMessage,
+      ])
+
+      startInFlight.current = true
+      startingConversationId.current = conversationId
       setState({ streamingContent: '', isStreaming: true, error: null })
 
-      const input: ChatStreamStartInput = { conversationId, prompt: message, model }
+      const input: ChatStreamStartInput = {
+        conversationId,
+        prompt: trimmedMessage,
+        model,
+      }
       try {
         const { requestId } = await requireEntropyApi().chat.stream.start(input)
         activeStream.current = { requestId, conversationId }
+        return true
       } catch (error) {
+        queryClient.setQueryData<ChatMessage[]>(QUERY_KEYS.messages(conversationId), (prev = []) =>
+          prev.filter((message) => message.id !== optimisticMessageId)
+        )
         setState({
           streamingContent: '',
           isStreaming: false,
           error: error instanceof Error ? error.message : 'Failed to start chat stream',
         })
+        return false
+      } finally {
+        startInFlight.current = false
+        startingConversationId.current = null
       }
     },
-    [conversationId]
+    [conversationId, queryClient]
   )
 
   const cancelStream = useCallback(async () => {
     if (!activeStream.current) return
     try {
       await requireEntropyApi().chat.stream.cancel(activeStream.current.requestId)
-      if (activeStream.current.conversationId === currentConversationId.current) {
-        setState((prev) => ({ ...prev, isStreaming: false }))
-      }
     } catch (error) {
       setState((prev) => ({
         ...prev,

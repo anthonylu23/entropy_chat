@@ -63,7 +63,10 @@ export default function App() {
   if (appState === 'needs-key') {
     return (
       <main className="flex min-h-screen items-center justify-center p-8">
-        <ApiKeyCard onKeySaved={handleKeySaved} />
+        <div className="flex w-full max-w-md flex-col gap-3">
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          <ApiKeyCard onKeySaved={handleKeySaved} />
+        </div>
       </main>
     )
   }
