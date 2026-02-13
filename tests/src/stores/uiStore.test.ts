@@ -75,4 +75,26 @@ describe('src/stores/uiStore', () => {
     expect(state.paneConversations.left).toBeNull()
     expect(state.openTabsBySpace.space_empty).toEqual([])
   })
+
+  test('setActiveSpace does not duplicate the same conversation across both panes', () => {
+    useUiStore.setState({
+      activeConversationId: 'conv_right',
+      activeSpaceId: DEFAULT_SPACE_ID,
+      focusedPane: 'right',
+      splitEnabled: true,
+      paneConversations: { left: 'conv_shared', right: 'conv_right' },
+      openTabsBySpace: {
+        [DEFAULT_SPACE_ID]: ['conv_shared', 'conv_right'],
+        space_work: ['conv_shared']
+      }
+    })
+
+    useUiStore.getState().setActiveSpace('space_work')
+    const state = useUiStore.getState()
+
+    expect(state.activeSpaceId).toBe('space_work')
+    expect(state.paneConversations.left).toBe('conv_shared')
+    expect(state.paneConversations.right).toBeNull()
+    expect(state.activeConversationId).toBeNull()
+  })
 })

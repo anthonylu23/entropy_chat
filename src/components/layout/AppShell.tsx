@@ -71,7 +71,9 @@ export function AppShell() {
   const singlePaneFocus = useUiStore((s) => s.singlePaneFocus)
   const paneConversations = useUiStore((s) => s.paneConversations)
   const openTabsBySpace = useUiStore((s) => s.openTabsBySpace)
-  const setActiveConversation = useUiStore((s) => s.setActiveConversation)
+  const openConversationInFocusedPane = useUiStore(
+    (s) => s.openConversationInFocusedPane
+  )
   const setActiveSpace = useUiStore((s) => s.setActiveSpace)
   const setFocusedPane = useUiStore((s) => s.setFocusedPane)
   const setSplitEnabled = useUiStore((s) => s.setSplitEnabled)
@@ -87,10 +89,21 @@ export function AppShell() {
     [activeSpaceId]
   )
 
+  const conversationsInActiveSpace = useMemo(
+    () => conversations.filter((conversation) => conversation.spaceId === activeSpaceId),
+    [activeSpaceId, conversations]
+  )
+
   useEffect(() => {
-    if (conversations.length === 0 || activeConversationId) return
-    setActiveConversation(conversations[0]!.id)
-  }, [activeConversationId, conversations, setActiveConversation])
+    if (conversationsInActiveSpace.length === 0) return
+    if (
+      activeConversationId &&
+      conversationsInActiveSpace.some((conversation) => conversation.id === activeConversationId)
+    ) {
+      return
+    }
+    openConversationInFocusedPane(conversationsInActiveSpace[0]!.id)
+  }, [activeConversationId, conversationsInActiveSpace, openConversationInFocusedPane])
 
   useEffect(() => {
     let cancelled = false
@@ -122,6 +135,13 @@ export function AppShell() {
   const handleNewChat = useCallback(() => {
     createConversation.mutate(undefined)
   }, [createConversation])
+
+  const handleOpenConversation = useCallback(
+    (conversationId: string) => {
+      openConversationInFocusedPane(conversationId)
+    },
+    [openConversationInFocusedPane]
+  )
 
   useEffect(() => {
     if (!layoutReady || !loadedLayoutRef.current) return
@@ -235,9 +255,9 @@ export function AppShell() {
       {!zenMode && (
         <WorkspaceSidebar
           spaceName={activeSpace.name}
-          conversations={conversations}
+          conversations={conversationsInActiveSpace}
           activeConversationId={activeConversationId}
-          onSelectConversation={setActiveConversation}
+          onSelectConversation={handleOpenConversation}
           onNewChat={handleNewChat}
         />
       )}
@@ -245,9 +265,9 @@ export function AppShell() {
         {!zenMode && (
           <PinnedTabStrip
             tabConversationIds={tabConversationIds}
-            conversations={conversations}
+            conversations={conversationsInActiveSpace}
             activeConversationId={activeConversationId}
-            onSelectConversation={setActiveConversation}
+            onSelectConversation={handleOpenConversation}
           />
         )}
         <div className="flex h-12 items-center justify-between border-b border-border/50 bg-black/10 px-3">
@@ -281,7 +301,7 @@ export function AppShell() {
               Focus
             </Button>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <button
               type="button"
               className={
@@ -305,6 +325,14 @@ export function AppShell() {
               >
                 Right
               </button>
+            )}
+            {splitEnabled && (
+              <span
+                className="rounded-md border border-border/60 bg-black/20 px-2 py-1"
+                title="If this conversation is already open in the opposite pane, focus will jump there."
+              >
+                Re-select focuses existing pane
+              </span>
             )}
           </div>
         </div>

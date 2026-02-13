@@ -7,8 +7,14 @@ import {
   validateChatStreamErrorEvent,
   validateChatStreamStartInput,
   validateConversationsCreateRequest,
+  validateConversationsMoveToSpaceRequest,
+  validateConversationsPinRequest,
+  validateConversationsReorderPinnedRequest,
   validateCredentialsSetOpenAIKeyRequest,
   validateMessagesListByConversationRequest,
+  validateSpacesCreateRequest,
+  validateSpacesReorderRequest,
+  validateSpacesUpdateRequest,
   validateSettingsGetRequest,
   validateSettingsSetRequest
 } from '@shared/validators'
@@ -52,11 +58,38 @@ const entropyApi: EntropyApi = {
       await ipcRenderer.invoke(IPC_CHANNELS.CREDENTIALS_SET_OPENAI_KEY, payload)
     }
   },
+  spaces: {
+    list: async () => ipcRenderer.invoke(IPC_CHANNELS.SPACES_LIST),
+    create: async (input) => {
+      validateSpacesCreateRequest(input)
+      return ipcRenderer.invoke(IPC_CHANNELS.SPACES_CREATE, input)
+    },
+    update: async (input) => {
+      validateSpacesUpdateRequest(input)
+      return ipcRenderer.invoke(IPC_CHANNELS.SPACES_UPDATE, input)
+    },
+    reorder: async (input) => {
+      validateSpacesReorderRequest(input)
+      await ipcRenderer.invoke(IPC_CHANNELS.SPACES_REORDER, input)
+    }
+  },
   conversations: {
     list: async () => ipcRenderer.invoke(IPC_CHANNELS.CONVERSATIONS_LIST),
     create: async (input) => {
       validateConversationsCreateRequest(input)
       return ipcRenderer.invoke(IPC_CHANNELS.CONVERSATIONS_CREATE, input)
+    },
+    pin: async (input) => {
+      validateConversationsPinRequest(input)
+      return ipcRenderer.invoke(IPC_CHANNELS.CONVERSATIONS_PIN, input)
+    },
+    reorderPinned: async (input) => {
+      validateConversationsReorderPinnedRequest(input)
+      await ipcRenderer.invoke(IPC_CHANNELS.CONVERSATIONS_REORDER_PINNED, input)
+    },
+    moveToSpace: async (input) => {
+      validateConversationsMoveToSpaceRequest(input)
+      return ipcRenderer.invoke(IPC_CHANNELS.CONVERSATIONS_MOVE_TO_SPACE, input)
     }
   },
   messages: {

@@ -5,8 +5,14 @@ import type {
   ChatStreamErrorEvent,
   ChatStreamStartInput,
   ConversationsCreateRequest,
+  ConversationsMoveToSpaceRequest,
+  ConversationsPinRequest,
+  ConversationsReorderPinnedRequest,
   CredentialsSetOpenAIKeyRequest,
   MessagesListByConversationRequest,
+  SpacesCreateRequest,
+  SpacesReorderRequest,
+  SpacesUpdateRequest,
   SettingsGetRequest,
   SettingsSetRequest
 } from '@shared/types'
@@ -17,6 +23,18 @@ function isNonEmptyString(value: unknown): value is string {
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object'
+}
+
+function isNullableString(value: unknown): value is string | null {
+  return value === null || typeof value === 'string'
+}
+
+function isNonEmptyStringArray(value: unknown): value is string[] {
+  return Array.isArray(value) && value.every((entry) => isNonEmptyString(entry))
+}
+
+function hasUniqueEntries(entries: string[]): boolean {
+  return new Set(entries).size === entries.length
 }
 
 export function validateSettingsGetRequest(value: unknown): asserts value is SettingsGetRequest {
@@ -55,9 +73,118 @@ export function validateConversationsCreateRequest(
     throw new Error('Invalid conversations.create payload')
   }
 
-  const title = (value as { title?: unknown }).title
-  if (title !== undefined && !isNonEmptyString(title)) {
+  const candidate = value as { title?: unknown; spaceId?: unknown }
+  if (
+    (candidate.title !== undefined && !isNonEmptyString(candidate.title)) ||
+    (candidate.spaceId !== undefined && !isNonEmptyString(candidate.spaceId))
+  ) {
     throw new Error('Invalid conversations.create payload')
+  }
+}
+
+export function validateSpacesCreateRequest(value: unknown): asserts value is SpacesCreateRequest {
+  if (!isObject(value)) {
+    throw new Error('Invalid spaces.create payload')
+  }
+
+  const candidate = value as { name?: unknown; color?: unknown; icon?: unknown }
+  if (
+    !isNonEmptyString(candidate.name) ||
+    (candidate.color !== undefined && !isNonEmptyString(candidate.color)) ||
+    (candidate.icon !== undefined && !isNonEmptyString(candidate.icon))
+  ) {
+    throw new Error('Invalid spaces.create payload')
+  }
+}
+
+export function validateSpacesUpdateRequest(value: unknown): asserts value is SpacesUpdateRequest {
+  if (!isObject(value)) {
+    throw new Error('Invalid spaces.update payload')
+  }
+
+  const candidate = value as { id?: unknown; name?: unknown; color?: unknown; icon?: unknown }
+  const hasName = candidate.name !== undefined
+  const hasColor = candidate.color !== undefined
+  const hasIcon = candidate.icon !== undefined
+
+  if (
+    !isNonEmptyString(candidate.id) ||
+    (!hasName && !hasColor && !hasIcon) ||
+    (hasName && !isNonEmptyString(candidate.name)) ||
+    (hasColor &&
+      (!isNullableString(candidate.color) ||
+        (typeof candidate.color === 'string' && candidate.color.trim().length === 0))) ||
+    (hasIcon &&
+      (!isNullableString(candidate.icon) ||
+        (typeof candidate.icon === 'string' && candidate.icon.trim().length === 0)))
+  ) {
+    throw new Error('Invalid spaces.update payload')
+  }
+}
+
+export function validateSpacesReorderRequest(
+  value: unknown
+): asserts value is SpacesReorderRequest {
+  if (!isObject(value)) {
+    throw new Error('Invalid spaces.reorder payload')
+  }
+
+  const orderedSpaceIds = (value as { orderedSpaceIds?: unknown }).orderedSpaceIds
+  if (
+    !isNonEmptyStringArray(orderedSpaceIds) ||
+    orderedSpaceIds.length === 0 ||
+    !hasUniqueEntries(orderedSpaceIds)
+  ) {
+    throw new Error('Invalid spaces.reorder payload')
+  }
+}
+
+export function validateConversationsPinRequest(
+  value: unknown
+): asserts value is ConversationsPinRequest {
+  if (!isObject(value)) {
+    throw new Error('Invalid conversations.pin payload')
+  }
+
+  const candidate = value as { conversationId?: unknown; pinned?: unknown }
+  if (
+    !isNonEmptyString(candidate.conversationId) ||
+    typeof candidate.pinned !== 'boolean'
+  ) {
+    throw new Error('Invalid conversations.pin payload')
+  }
+}
+
+export function validateConversationsReorderPinnedRequest(
+  value: unknown
+): asserts value is ConversationsReorderPinnedRequest {
+  if (!isObject(value)) {
+    throw new Error('Invalid conversations.reorderPinned payload')
+  }
+
+  const candidate = value as { spaceId?: unknown; orderedConversationIds?: unknown }
+  if (
+    !isNonEmptyString(candidate.spaceId) ||
+    !isNonEmptyStringArray(candidate.orderedConversationIds) ||
+    !hasUniqueEntries(candidate.orderedConversationIds)
+  ) {
+    throw new Error('Invalid conversations.reorderPinned payload')
+  }
+}
+
+export function validateConversationsMoveToSpaceRequest(
+  value: unknown
+): asserts value is ConversationsMoveToSpaceRequest {
+  if (!isObject(value)) {
+    throw new Error('Invalid conversations.moveToSpace payload')
+  }
+
+  const candidate = value as { conversationId?: unknown; spaceId?: unknown }
+  if (
+    !isNonEmptyString(candidate.conversationId) ||
+    !isNonEmptyString(candidate.spaceId)
+  ) {
+    throw new Error('Invalid conversations.moveToSpace payload')
   }
 }
 

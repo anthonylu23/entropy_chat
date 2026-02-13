@@ -39,6 +39,8 @@ interface UiState {
   toggleZenMode: () => void
   setSinglePaneFocus: (enabled: boolean) => void
   toggleSinglePaneFocus: () => void
+  openConversationInFocusedPane: (conversationId: string) => void
+  openConversationInPane: (pane: WorkspacePane, conversationId: string) => void
   setPaneConversation: (pane: WorkspacePane, id: string | null) => void
   openTab: (spaceId: string, conversationId: string) => void
   hydrateWorkspaceLayout: (layout: WorkspaceLayoutSnapshot) => void
@@ -51,7 +53,23 @@ function uniqueAppend(tabs: string[], id: string): string[] {
   return [...tabs, id]
 }
 
-export const useUiStore = create<UiState>((set) => ({
+function getOtherPane(pane: WorkspacePane): WorkspacePane {
+  return pane === 'left' ? 'right' : 'left'
+}
+
+function appendConversationToActiveSpaceTabs(
+  openTabsBySpace: Record<string, string[]>,
+  activeSpaceId: string,
+  conversationId: string
+): Record<string, string[]> {
+  const existingTabs = openTabsBySpace[activeSpaceId] ?? []
+  return {
+    ...openTabsBySpace,
+    [activeSpaceId]: uniqueAppend(existingTabs, conversationId),
+  }
+}
+
+export const useUiStore = create<UiState>((set, get) => ({
   activeConversationId: null,
   activeSpaceId: DEFAULT_SPACE_ID,
   focusedPane: 'left',
@@ -62,30 +80,19 @@ export const useUiStore = create<UiState>((set) => ({
   openTabsBySpace: { [DEFAULT_SPACE_ID]: [] },
   sidebarOpen: true,
 
-  setActiveConversation: (id) =>
-    set((state) => {
-      const nextPaneConversations = {
-        ...state.paneConversations,
-        [state.focusedPane]: id,
-      }
-
-      if (!id) {
-        return {
-          activeConversationId: null,
-          paneConversations: nextPaneConversations,
-        }
-      }
-
-      const existingTabs = state.openTabsBySpace[state.activeSpaceId] ?? []
-      return {
-        activeConversationId: id,
-        paneConversations: nextPaneConversations,
-        openTabsBySpace: {
-          ...state.openTabsBySpace,
-          [state.activeSpaceId]: uniqueAppend(existingTabs, id),
+  setActiveConversation: (id) => {
+    if (id === null) {
+      set((state) => ({
+        activeConversationId: null,
+        paneConversations: {
+          ...state.paneConversations,
+          [state.focusedPane]: null,
         },
-      }
-    }),
+      }))
+      return
+    }
+    get().openConversationInFocusedPane(id)
+  },
   setActiveSpace: (spaceId) =>
     set((state) => {
       const tabsForSpace = state.openTabsBySpace[spaceId] ?? []
@@ -101,7 +108,10 @@ export const useUiStore = create<UiState>((set) => ({
       }
 
       if (!nextPaneConversations[state.focusedPane] && tabsForSpace.length > 0) {
-        nextPaneConversations[state.focusedPane] = tabsForSpace[0]!
+        const otherPane = getOtherPane(state.focusedPane)
+        nextPaneConversations[state.focusedPane] =
+          tabsForSpace.find((conversationId) => conversationId !== nextPaneConversations[otherPane]) ??
+          null
       }
 
       return {
@@ -140,26 +150,129 @@ export const useUiStore = create<UiState>((set) => ({
   setSinglePaneFocus: (enabled) => set({ singlePaneFocus: enabled }),
   toggleSinglePaneFocus: () =>
     set((state) => ({ singlePaneFocus: !state.singlePaneFocus })),
+  openConversationInFocusedPane: (conversationId) =>
+    set((state) => {
+      const targetPane = state.focusedPane
+      const otherPane = getOtherPane(targetPane)
+      const openTabsBySpace = appendConversationToActiveSpaceTabs(
+        state.openTabsBySpace,
+        state.activeSpaceId,
+        conversationId
+      )
+
+      if (state.paneConversations[otherPane] === conversationId) {
+        if (!state.splitEnabled) {
+          return {
+            focusedPane: targetPane,
+            activeConversationId: conversationId,
+            paneConversations: {
+              ...state.paneConversations,
+              [targetPane]: conversationId,
+              [otherPane]: null,
+            },
+            openTabsBySpace,
+          }
+        }
+
+        return {
+          focusedPane: otherPane,
+          activeConversationId: conversationId,
+          openTabsBySpace,
+        }
+      }
+
+      return {
+        activeConversationId: conversationId,
+        paneConversations: {
+          ...state.paneConversations,
+          [targetPane]: conversationId,
+        },
+        openTabsBySpace,
+      }
+    }),
+  openConversationInPane: (pane, conversationId) =>
+    set((state) => {
+      const otherPane = getOtherPane(pane)
+      const openTabsBySpace = appendConversationToActiveSpaceTabs(
+        state.openTabsBySpace,
+        state.activeSpaceId,
+        conversationId
+      )
+
+      if (state.paneConversations[otherPane] === conversationId) {
+        if (!state.splitEnabled) {
+          return {
+            focusedPane: pane,
+            activeConversationId: conversationId,
+            paneConversations: {
+              ...state.paneConversations,
+              [pane]: conversationId,
+              [otherPane]: null,
+            },
+            openTabsBySpace,
+          }
+        }
+
+        return {
+          focusedPane: otherPane,
+          activeConversationId: conversationId,
+          openTabsBySpace,
+        }
+      }
+
+      return {
+        focusedPane: pane,
+        activeConversationId: conversationId,
+        paneConversations: {
+          ...state.paneConversations,
+          [pane]: conversationId,
+        },
+        openTabsBySpace,
+      }
+    }),
   setPaneConversation: (pane, id) =>
     set((state) => {
-      const nextPaneConversations = { ...state.paneConversations, [pane]: id }
       if (!id) {
         return {
-          paneConversations: nextPaneConversations,
+          paneConversations: { ...state.paneConversations, [pane]: null },
           activeConversationId:
             state.focusedPane === pane ? null : state.activeConversationId,
         }
       }
 
-      const existingTabs = state.openTabsBySpace[state.activeSpaceId] ?? []
+      const otherPane = getOtherPane(pane)
+      const openTabsBySpace = appendConversationToActiveSpaceTabs(
+        state.openTabsBySpace,
+        state.activeSpaceId,
+        id
+      )
+
+      if (state.paneConversations[otherPane] === id) {
+        if (!state.splitEnabled) {
+          return {
+            focusedPane: pane,
+            activeConversationId: id,
+            paneConversations: {
+              ...state.paneConversations,
+              [pane]: id,
+              [otherPane]: null,
+            },
+            openTabsBySpace,
+          }
+        }
+
+        return {
+          focusedPane: otherPane,
+          activeConversationId: id,
+          openTabsBySpace,
+        }
+      }
+
       return {
-        paneConversations: nextPaneConversations,
-        activeConversationId:
-          state.focusedPane === pane ? id : state.activeConversationId,
-        openTabsBySpace: {
-          ...state.openTabsBySpace,
-          [state.activeSpaceId]: uniqueAppend(existingTabs, id),
-        },
+        focusedPane: pane,
+        paneConversations: { ...state.paneConversations, [pane]: id },
+        activeConversationId: id,
+        openTabsBySpace,
       }
     }),
   openTab: (spaceId, conversationId) =>

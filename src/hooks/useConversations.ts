@@ -25,14 +25,16 @@ export function useMessages(conversationId: string | null) {
 
 export function useCreateConversation() {
   const queryClient = useQueryClient()
-  const setActiveConversation = useUiStore((s) => s.setActiveConversation)
+  const openConversationInFocusedPane = useUiStore(
+    (s) => s.openConversationInFocusedPane
+  )
 
   return useMutation({
     mutationFn: (input?: ConversationsCreateRequest) =>
       requireEntropyApi().conversations.create(input),
     onSuccess: (created) => {
       void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.conversations })
-      setActiveConversation(created.id)
+      openConversationInFocusedPane(created.id)
     },
   })
 }

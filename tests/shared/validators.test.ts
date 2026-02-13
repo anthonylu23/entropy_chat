@@ -6,8 +6,14 @@ import {
   validateChatStreamErrorEvent,
   validateChatStreamStartInput,
   validateConversationsCreateRequest,
+  validateConversationsMoveToSpaceRequest,
+  validateConversationsPinRequest,
+  validateConversationsReorderPinnedRequest,
   validateCredentialsSetOpenAIKeyRequest,
   validateMessagesListByConversationRequest,
+  validateSpacesCreateRequest,
+  validateSpacesReorderRequest,
+  validateSpacesUpdateRequest,
   validateSettingsGetRequest,
   validateSettingsSetRequest
 } from '../../shared/validators'
@@ -52,10 +58,103 @@ describe('shared/validators', () => {
     expectValid(validateConversationsCreateRequest, undefined)
     expectValid(validateConversationsCreateRequest, {})
     expectValid(validateConversationsCreateRequest, { title: 'New chat' })
+    expectValid(validateConversationsCreateRequest, { title: 'New chat', spaceId: 'space_general' })
     expectInvalid(
       validateConversationsCreateRequest,
       { title: '' },
       'Invalid conversations.create payload'
+    )
+    expectInvalid(
+      validateConversationsCreateRequest,
+      { title: 'New chat', spaceId: '' },
+      'Invalid conversations.create payload'
+    )
+  })
+
+  test('validates spaces.create payloads', () => {
+    expectValid(validateSpacesCreateRequest, { name: 'General' })
+    expectValid(validateSpacesCreateRequest, { name: 'Work', color: '#112233', icon: 'briefcase' })
+    expectInvalid(validateSpacesCreateRequest, { name: '' }, 'Invalid spaces.create payload')
+    expectInvalid(
+      validateSpacesCreateRequest,
+      { name: 'Team', color: '' },
+      'Invalid spaces.create payload'
+    )
+  })
+
+  test('validates spaces.update payloads', () => {
+    expectValid(validateSpacesUpdateRequest, { id: 'space_general', name: 'General 2' })
+    expectValid(validateSpacesUpdateRequest, { id: 'space_general', color: '#abc' })
+    expectValid(validateSpacesUpdateRequest, { id: 'space_general', color: null, icon: null })
+    expectInvalid(validateSpacesUpdateRequest, { id: 'space_general' }, 'Invalid spaces.update payload')
+    expectInvalid(validateSpacesUpdateRequest, { id: '', name: 'x' }, 'Invalid spaces.update payload')
+    expectInvalid(
+      validateSpacesUpdateRequest,
+      { id: 'space_general', icon: '' },
+      'Invalid spaces.update payload'
+    )
+  })
+
+  test('validates spaces.reorder payloads', () => {
+    expectValid(validateSpacesReorderRequest, {
+      orderedSpaceIds: ['space_general', 'space_work']
+    })
+    expectInvalid(
+      validateSpacesReorderRequest,
+      { orderedSpaceIds: [] },
+      'Invalid spaces.reorder payload'
+    )
+    expectInvalid(
+      validateSpacesReorderRequest,
+      { orderedSpaceIds: ['space_general', 'space_general'] },
+      'Invalid spaces.reorder payload'
+    )
+  })
+
+  test('validates conversations.pin payloads', () => {
+    expectValid(validateConversationsPinRequest, { conversationId: 'conv_123', pinned: true })
+    expectInvalid(
+      validateConversationsPinRequest,
+      { conversationId: '', pinned: true },
+      'Invalid conversations.pin payload'
+    )
+    expectInvalid(
+      validateConversationsPinRequest,
+      { conversationId: 'conv_123', pinned: 'yes' },
+      'Invalid conversations.pin payload'
+    )
+  })
+
+  test('validates conversations.reorderPinned payloads', () => {
+    expectValid(validateConversationsReorderPinnedRequest, {
+      spaceId: 'space_general',
+      orderedConversationIds: ['conv_1', 'conv_2']
+    })
+    expectValid(validateConversationsReorderPinnedRequest, {
+      spaceId: 'space_general',
+      orderedConversationIds: []
+    })
+    expectInvalid(
+      validateConversationsReorderPinnedRequest,
+      { spaceId: '', orderedConversationIds: [] },
+      'Invalid conversations.reorderPinned payload'
+    )
+    expectInvalid(
+      validateConversationsReorderPinnedRequest,
+      { spaceId: 'space_general', orderedConversationIds: ['conv_1', 'conv_1'] },
+      'Invalid conversations.reorderPinned payload'
+    )
+  })
+
+  test('validates conversations.moveToSpace payloads', () => {
+    expectValid(validateConversationsMoveToSpaceRequest, {
+      conversationId: 'conv_123',
+      spaceId: 'space_general'
+    })
+    expectInvalid(
+      validateConversationsMoveToSpaceRequest,
+      { conversationId: 'conv_123', spaceId: '' },
+      'Invalid conversations.moveToSpace payload'
     )
   })
 
