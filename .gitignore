@@ -12,3 +12,15 @@ coverage/
 .vscode/
 *.tsbuildinfo
 bun.lockb
+package-lock.json
+
+# Agent workflow artifacts
+agents/locks/
+agents/patches/
+
+# IDE
+.cursor/
+
+# Local SQLite databases
+*.sqlite
+*.sqlite3
