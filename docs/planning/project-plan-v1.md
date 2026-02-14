@@ -500,6 +500,10 @@ Detailed plan: [`docs/planning/phase1-slice2-arc-workspace-plan.md`](phase1-slic
 
 Parallel execution matrix (1 orchestrator + 2 coders): [`docs/planning/phase1-slice2-parallel-execution-matrix.md`](phase1-slice2-parallel-execution-matrix.md)
 
+Next queued atomic tasks for agent execution:
+- `A6-INPUT-GUARDS` (Coder-A): strict payload bounds for space naming + backend semantics tests.
+- `B7-SPACE-UX` (Coder-B): replace prompt-based space create/rename with explicit UI controls.
+
 - [x] `P1S2-01` Add SQLite migration file for spaces schema.
 - [x] `P1S2-02` Backfill existing conversations with default `space_id`.
 - [x] `P1S2-03` Add `spaces.list` IPC + preload API.

@@ -20,6 +20,16 @@ const spaces = [
     createdAt: '',
     updatedAt: '',
   },
+  {
+    id: 'space_work',
+    name: 'Work',
+    color: null,
+    icon: null,
+    sortOrder: 1,
+    isDefault: false,
+    createdAt: '',
+    updatedAt: '',
+  },
 ]
 
 const conversations = [
@@ -38,6 +48,15 @@ const conversations = [
     pinned: false,
     pinnedOrder: null,
     spaceId: DEFAULT_SPACE_ID,
+    createdAt: '',
+    updatedAt: '',
+  },
+  {
+    id: 'conv_work',
+    title: 'Work Conversation',
+    pinned: false,
+    pinnedOrder: null,
+    spaceId: 'space_work',
     createdAt: '',
     updatedAt: '',
   },
@@ -90,6 +109,12 @@ const GLOBAL_KEYS = [
 
 type GlobalKey = (typeof GLOBAL_KEYS)[number]
 type GlobalDescriptorSnapshot = Partial<Record<GlobalKey, PropertyDescriptor>>
+type ShortcutModifier = { label: 'Ctrl' | 'Cmd'; ctrlKey?: boolean; metaKey?: boolean }
+
+const SHORTCUT_MODIFIERS: ShortcutModifier[] = [
+  { label: 'Ctrl', ctrlKey: true },
+  { label: 'Cmd', metaKey: true },
+]
 
 function snapshotGlobalDescriptors(): GlobalDescriptorSnapshot {
   const snapshot: GlobalDescriptorSnapshot = {}
@@ -187,6 +212,17 @@ function installDom() {
   }
 }
 
+function fireShortcut(
+  modifier: ShortcutModifier,
+  keyEvent: { key: string; code?: string; shiftKey?: boolean }
+) {
+  fireEvent.keyDown(window, {
+    ...keyEvent,
+    ctrlKey: Boolean(modifier.ctrlKey),
+    metaKey: Boolean(modifier.metaKey),
+  })
+}
+
 beforeAll(async () => {
   AppShell = (await import('@renderer/components/layout/AppShell')).AppShell
 })
@@ -266,4 +302,74 @@ describe('AppShell interactions', () => {
       expect(useUiStore.getState().focusedPane).toBe('right')
     })
   })
+
+  for (const modifier of SHORTCUT_MODIFIERS) {
+    test(`keyboard ${modifier.label}+\\ toggles split mode`, async () => {
+      render(<AppShell />)
+
+      expect(useUiStore.getState().splitEnabled).toBeFalse()
+
+      fireShortcut(modifier, {
+        key: '\\',
+      })
+
+      await waitFor(() => {
+        expect(useUiStore.getState().splitEnabled).toBeTrue()
+      })
+    })
+
+    test(`keyboard ${modifier.label}+Shift+F toggles zen mode with Exit Zen affordance`, async () => {
+      const view = render(<AppShell />)
+
+      expect(useUiStore.getState().zenMode).toBeFalse()
+
+      fireShortcut(modifier, {
+        key: 'F',
+        shiftKey: true,
+      })
+
+      await waitFor(() => {
+        expect(useUiStore.getState().zenMode).toBeTrue()
+        expect(view.getByRole('button', { name: 'Exit Zen' })).toBeTruthy()
+      })
+    })
+
+    test(`keyboard ${modifier.label}+Shift+1 toggles single-pane focus`, async () => {
+      render(<AppShell />)
+
+      expect(useUiStore.getState().singlePaneFocus).toBeFalse()
+
+      fireShortcut(modifier, {
+        key: '!',
+        code: 'Digit1',
+        shiftKey: true,
+      })
+
+      await waitFor(() => {
+        expect(useUiStore.getState().singlePaneFocus).toBeTrue()
+      })
+    })
+
+    test(`keyboard ${modifier.label}+1..2 switches spaces by index`, async () => {
+      render(<AppShell />)
+
+      expect(useUiStore.getState().activeSpaceId).toBe(DEFAULT_SPACE_ID)
+
+      fireShortcut(modifier, {
+        key: '2',
+      })
+
+      await waitFor(() => {
+        expect(useUiStore.getState().activeSpaceId).toBe('space_work')
+      })
+
+      fireShortcut(modifier, {
+        key: '1',
+      })
+
+      await waitFor(() => {
+        expect(useUiStore.getState().activeSpaceId).toBe(DEFAULT_SPACE_ID)
+      })
+    })
+  }
 })

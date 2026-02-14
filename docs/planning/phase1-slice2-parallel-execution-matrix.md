@@ -41,6 +41,11 @@ Worktree mode: not used. This matrix is optimized for a single shared working tr
 | `A4` | Coder-A | `VIS-A1`, `VIS-A2`, `VIS-A3`, `VIS-A4` (design-system and docs lane) | `B4` (after `VIS-A1`) | `Complete` |
 | `B4` | Coder-B | `VIS-B1`, `VIS-B2`, `VIS-B3`, `VIS-B4`, `VIS-B5` (layout visual alignment lane) | `A4` (after `VIS-A1`) | `Planned` |
 | `INT-VIS` | Orchestrator | Visual alignment acceptance pass (`bun test tests`, `bun run typecheck`, `bun run build`) | After `A4` and `B4` | `Planned` |
+| `N1-A` | Coder-A | `A5-DOC-SYNC` (planning/docs consistency sync) | `N1-B` | `Complete` |
+| `N1-B` | Coder-B | `B6-KEYBOARD-COVERAGE` (AppShell shortcut integration tests) | `N1-A` | `Complete` |
+| `N2-A` | Coder-A | `A6-INPUT-GUARDS` (space payload bounds + IPC test hardening) | `N2-B` | `Planned` |
+| `N2-B` | Coder-B | `B7-SPACE-UX` (replace prompt-based space rename/create flows) | `N2-A` | `Planned` |
+| `INT-NEXT` | Orchestrator | Post-follow-up acceptance pass (`bun test tests`, `bun run typecheck`, `bun run build`) | After `N2-A` and `N2-B` | `Planned` |
 
 ## Dependency Gates
 
@@ -52,12 +57,15 @@ Worktree mode: not used. This matrix is optimized for a single shared working tr
 - `Gate-6` (`VIS-A1` complete): flat Arc-minimal tokens must land before parallel visual refactor work.
 - `Gate-7` (`A4` + `B4` complete): visual-direction alignment tasks (`VIS-*`) must be complete before visual acceptance.
 - `Gate-8` (`INT-VIS`): run visual acceptance checks (`bun test tests`, `bun run typecheck`, `bun run build`).
+- `Gate-9` (`N1-A` + `N1-B` complete): docs and shortcut coverage must land before next UX/validation hardening batch.
+- `Gate-10` (`N2-A` + `N2-B` complete): input validation hardening and space-UX refactor must both land before release-ready gate.
+- `Gate-11` (`INT-NEXT`): run post-follow-up acceptance checks (`bun test tests`, `bun run typecheck`, `bun run build`).
 
 ## Patch and Merge Protocol (No Worktrees)
 
 - Patch sizing rule: one patch should cover one contiguous batch or a small subset of IDs in a single lane.
 - Patch naming rule: prefix with task IDs, example `S2-DB-01..04_create-spaces-table.patch`.
-- Apply rule: orchestrator applies patches in order `A1 -> B1 -> A2 -> B2 -> A3 -> B3 -> INT -> A4 -> B4 -> INT-VIS`.
+- Apply rule: orchestrator applies patches in order `A1 -> B1 -> A2 -> B2 -> A3 -> B3 -> INT -> A4 -> B4 -> INT-VIS -> N1-A -> N1-B -> N2-A -> N2-B -> INT-NEXT`.
 - Apply command pattern (orchestrator): `git apply --index agents/patches/coder-a/<patch-file>` and `git apply --index agents/patches/coder-b/<patch-file>`.
 - Commit message rule (orchestrator): include all landed task IDs in subject prefix.
 
