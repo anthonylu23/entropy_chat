@@ -38,7 +38,7 @@ Worktree mode: not used. This matrix is optimized for a single shared working tr
 | `A3` | Coder-A | `S2-INT-03` backend behavior tests + data semantics hardening | `B3` | `Complete` |
 | `B3` | Coder-B | `S2-INT-01`, `S2-INT-02`, `S2-INT-04` UI integration hardening | `A3` | `Complete` |
 | `INT` | Orchestrator | `S2-INT-05` acceptance/regression pass + merge sequencing | After `A3` and `B3` | `Complete` |
-| `A4` | Coder-A | `VIS-A1`, `VIS-A2`, `VIS-A3`, `VIS-A4` (design-system and docs lane) | `B4` (after `VIS-A1`) | `Planned` |
+| `A4` | Coder-A | `VIS-A1`, `VIS-A2`, `VIS-A3`, `VIS-A4` (design-system and docs lane) | `B4` (after `VIS-A1`) | `Complete` |
 | `B4` | Coder-B | `VIS-B1`, `VIS-B2`, `VIS-B3`, `VIS-B4`, `VIS-B5` (layout visual alignment lane) | `A4` (after `VIS-A1`) | `Planned` |
 | `INT-VIS` | Orchestrator | Visual alignment acceptance pass (`bun test tests`, `bun run typecheck`, `bun run build`) | After `A4` and `B4` | `Planned` |
 

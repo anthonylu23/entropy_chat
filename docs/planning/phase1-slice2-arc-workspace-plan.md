@@ -136,13 +136,13 @@ Atomicity rule for this slice: each checklist line is one independently shippabl
 - [x] `S2-INT-04` Add UI store tests for pane targeting + single-instance invariants across space switches.
 - [x] `S2-INT-05` Execute and document final acceptance/regression checklist results (`bun test tests`, `bun run typecheck`, `bun run build` all passing).
 
-### 9. Visual direction alignment (atomic task split, planned)
+### 9. Visual direction alignment (atomic task split)
 
 Agent A (design-system lane):
-- [ ] `VIS-A1` Define flat Arc-minimal tokens (remove/deprecate blur/glow/gradient styling tokens).
-- [ ] `VIS-A2` Wire Tailwind token usage to flat Arc-minimal tokens only.
-- [ ] `VIS-A3` Align shared UI primitives to flat defaults (solid surfaces + borders only).
-- [ ] `VIS-A4` Sync architecture/code docs to the flat Arc-minimal system model.
+- [x] `VIS-A1` Define flat Arc-minimal tokens (remove/deprecate blur/glow/gradient styling tokens).
+- [x] `VIS-A2` Wire Tailwind token usage to flat Arc-minimal tokens only.
+- [x] `VIS-A3` Align shared UI primitives to flat defaults (solid surfaces + borders only).
+- [x] `VIS-A4` Sync architecture/code docs to the flat Arc-minimal system model.
 
 Agent B (layout lane):
 - [ ] `VIS-B1` Refactor shell container to flat wrapped viewport (no radial gradient/blur surfaces).
@@ -166,7 +166,7 @@ Atomicity rule:
 
 - **Flat, solid surfaces** — no gradients, no blur, no glassmorphism, no glare effects.
 - **Arc-style border wrapping** — the main chat viewport sits inside a rounded, bordered container, creating the distinctive Arc "content wrapped by sidebar" look.
-- **Sidebar bottom bar** — settings button and space switcher at the bottom of the sidebar.
+- **Sidebar bottom bar** — workspace mode controls and pane switcher at the bottom of the sidebar.
 - **Neutral dark palette** — true neutral grays, not warm-tinted.
 - **Restrained accent** — accent color for active/selected states only, not decorative.
 - **Compact desktop density** — navigation controls and tab strips use minimal spacing.

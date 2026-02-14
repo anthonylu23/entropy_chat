@@ -273,7 +273,7 @@ This is the "bring your own subscription" feature. Users with existing ChatGPT P
 
 ### Workspace Layout
 
-The workspace follows Arc browser's layout paradigm: a left sidebar containing spaces, conversation list, and bottom controls (settings + space switcher), with the main chat viewport rendered as a rounded, bordered container that the sidebar wraps around.
+The workspace follows Arc browser's layout paradigm: a left sidebar containing spaces, conversation list, and bottom controls (workspace mode + pane switcher), with the main chat viewport rendered as a rounded, bordered container that the sidebar wraps around.
 
 Planned near-term (Phase 1 Slice 2): Arc-style workspace shell with persistent spaces, per-space pinned tabs, two-pane split view, and focus modes (Zen mode + single-pane focus).
 
@@ -292,7 +292,7 @@ The app's visual identity is inspired by Arc browser: clean, minimal, and flat. 
 The layout follows Arc's distinctive pattern:
 
 - **Sidebar + wrapped content area:** A narrow sidebar sits on the left. The main chat viewport is visually wrapped by a continuous border/rounded container, creating a clear separation between navigation and content — like Arc's sidebar wrapping around the web view.
-- **Sidebar bottom bar:** Settings button and space switcher live at the bottom of the sidebar (not the top), mirroring Arc's bottom controls.
+- **Sidebar bottom bar:** Workspace mode controls and pane switcher live at the bottom of the sidebar (not the top), mirroring Arc-style bottom utility controls.
 - **Flat, solid surfaces:** No gradients, no blur, no glare. Surfaces use solid background colors with subtle elevation through border and background shade differences only.
 - **Compact, dense controls:** Navigation elements (space icons, conversation list, pinned tabs) use compact desktop density.
 - **Minimal chrome:** The app should feel like content-first with navigation tucked away cleanly.

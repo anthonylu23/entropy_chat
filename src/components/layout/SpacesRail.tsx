@@ -55,8 +55,8 @@ export function SpacesRail({
   }
 
   return (
-    <aside className="flex h-full w-20 shrink-0 flex-col items-center gap-3 border-r border-border/70 bg-black/15 p-3 backdrop-blur-lg">
-      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/70 bg-black/25 text-primary shadow-[0_8px_24px_rgba(0,0,0,0.35)]">
+    <aside className="flex h-full w-20 shrink-0 flex-col items-center gap-3 border-r border-border bg-surface-1 p-3">
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-border bg-surface-2 text-primary">
         <Layers className="h-5 w-5" />
       </div>
       <button
@@ -64,7 +64,7 @@ export function SpacesRail({
         onClick={handleCreateSpace}
         title="Create space"
         aria-label="Create space"
-        className="flex h-9 w-9 items-center justify-center rounded-xl border border-border/70 bg-black/20 text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary/10 hover:text-foreground"
+        className="flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-surface-2 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-surface-3 hover:text-foreground"
       >
         <Plus className="h-4 w-4" />
       </button>
@@ -80,8 +80,8 @@ export function SpacesRail({
               className={cn(
                 'group relative flex h-12 w-12 items-center justify-center rounded-2xl border text-xs font-semibold transition-all',
                 active
-                  ? 'border-primary/70 bg-primary/20 text-primary shadow-[0_10px_24px_rgba(0,184,169,0.25)]'
-                  : 'border-border/70 bg-black/20 text-muted-foreground hover:border-primary/40 hover:bg-primary/10 hover:text-foreground'
+                  ? 'border-primary/70 bg-primary/15 text-primary'
+                  : 'border-border bg-surface-2 text-muted-foreground hover:border-primary/40 hover:bg-surface-3 hover:text-foreground'
               )}
               title={`${space.name} (${index + 1})`}
               aria-label={`Switch to ${space.name}`}
@@ -98,7 +98,7 @@ export function SpacesRail({
           disabled={activeIndex <= 0}
           title="Move active space up"
           aria-label="Move active space up"
-          className="flex h-7 w-7 items-center justify-center rounded-md border border-border/70 bg-black/20 text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex h-7 w-7 items-center justify-center rounded-md border border-border bg-surface-2 text-muted-foreground transition-colors hover:bg-surface-3 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ArrowUp className="h-3.5 w-3.5" />
         </button>
@@ -108,7 +108,7 @@ export function SpacesRail({
           disabled={activeIndex < 0 || activeIndex >= spaces.length - 1}
           title="Move active space down"
           aria-label="Move active space down"
-          className="flex h-7 w-7 items-center justify-center rounded-md border border-border/70 bg-black/20 text-muted-foreground transition-colors hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex h-7 w-7 items-center justify-center rounded-md border border-border bg-surface-2 text-muted-foreground transition-colors hover:bg-surface-3 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
         >
           <ArrowDown className="h-3.5 w-3.5" />
         </button>
@@ -118,7 +118,7 @@ export function SpacesRail({
             onClick={() => handleRenameSpace(spaces[activeIndex]!)}
             title="Rename active space"
             aria-label="Rename active space"
-            className="mt-1 flex h-7 w-7 items-center justify-center rounded-md border border-border/70 bg-black/20 text-muted-foreground transition-colors hover:text-foreground"
+            className="mt-1 flex h-7 w-7 items-center justify-center rounded-md border border-border bg-surface-2 text-muted-foreground transition-colors hover:bg-surface-3 hover:text-foreground"
           >
             <Pencil className="h-3.5 w-3.5" />
           </button>

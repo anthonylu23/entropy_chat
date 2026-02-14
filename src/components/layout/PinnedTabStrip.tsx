@@ -21,7 +21,7 @@ export function PinnedTabStrip({
     .filter((value): value is ConversationSummary => Boolean(value))
 
   return (
-    <div className="flex h-12 items-center gap-2 border-b border-border/60 bg-black/10 px-3">
+    <div className="flex h-12 items-center gap-2 border-b border-border bg-surface-1 px-3">
       <div className="mr-1 flex items-center gap-1.5 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
         <Pin className="h-3.5 w-3.5" />
         Tabs
@@ -35,8 +35,8 @@ export function PinnedTabStrip({
             className={cn(
               'max-w-52 shrink-0 truncate rounded-md border px-3 py-1.5 text-xs transition-colors',
               activeConversationId === conversation.id
-                ? 'border-primary/60 bg-primary/20 text-foreground'
-                : 'border-border/70 bg-black/15 text-muted-foreground hover:bg-black/25 hover:text-foreground'
+                ? 'border-primary/60 bg-primary/15 text-foreground'
+                : 'border-border bg-surface-2 text-muted-foreground hover:bg-surface-3 hover:text-foreground'
             )}
             title={conversation.title ?? 'New Conversation'}
           >

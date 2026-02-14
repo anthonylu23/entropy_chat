@@ -162,4 +162,66 @@ describe('src/stores/uiStore', () => {
     expect(state.paneConversations.left).toBe('conv_left')
     expect(state.paneConversations.right).toBe('conv_right')
   })
+
+  test('setSplitEnabled(false) keeps left pane as active pane context', () => {
+    useUiStore.setState({
+      activeConversationId: 'conv_right',
+      activeSpaceId: DEFAULT_SPACE_ID,
+      focusedPane: 'right',
+      splitEnabled: true,
+      paneConversations: { left: 'conv_left', right: 'conv_right' },
+      openTabsBySpace: {
+        [DEFAULT_SPACE_ID]: ['conv_left', 'conv_right'],
+      },
+    })
+
+    useUiStore.getState().setSplitEnabled(false)
+    const state = useUiStore.getState()
+
+    expect(state.splitEnabled).toBeFalse()
+    expect(state.focusedPane).toBe('left')
+    expect(state.activeConversationId).toBe('conv_left')
+    expect(state.paneConversations.right).toBe('conv_right')
+  })
+
+  test('setFocusedPane tracks active conversation for pane switch controls', () => {
+    useUiStore.setState({
+      activeConversationId: 'conv_left',
+      activeSpaceId: DEFAULT_SPACE_ID,
+      focusedPane: 'left',
+      splitEnabled: true,
+      paneConversations: { left: 'conv_left', right: 'conv_right' },
+      openTabsBySpace: {
+        [DEFAULT_SPACE_ID]: ['conv_left', 'conv_right'],
+      },
+    })
+
+    useUiStore.getState().setFocusedPane('right')
+    const state = useUiStore.getState()
+
+    expect(state.focusedPane).toBe('right')
+    expect(state.activeConversationId).toBe('conv_right')
+  })
+
+  test('toggleSinglePaneFocus does not change split or focused pane state', () => {
+    useUiStore.setState({
+      activeConversationId: 'conv_right',
+      activeSpaceId: DEFAULT_SPACE_ID,
+      focusedPane: 'right',
+      splitEnabled: true,
+      singlePaneFocus: false,
+      paneConversations: { left: 'conv_left', right: 'conv_right' },
+      openTabsBySpace: {
+        [DEFAULT_SPACE_ID]: ['conv_left', 'conv_right'],
+      },
+    })
+
+    useUiStore.getState().toggleSinglePaneFocus()
+    const state = useUiStore.getState()
+
+    expect(state.singlePaneFocus).toBeTrue()
+    expect(state.splitEnabled).toBeTrue()
+    expect(state.focusedPane).toBe('right')
+    expect(state.activeConversationId).toBe('conv_right')
+  })
 })

@@ -19,3 +19,5 @@ Approvals is not needed for web search, feel free to use web search when necessa
 When dividing tasks for agents, ensure tasks are atomic. Parallel agents are being used (two for now), and I won't be using worktrees.
 
 If deemed necessary suggest refactors, and I will verify whether or not to make the changes.
+
+When referencing Arc browser design principles, feel free to take a look at Zen browser, which is opensource.

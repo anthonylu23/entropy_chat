@@ -79,8 +79,8 @@ export function SplitPaneWorkspace({
         style={{ width: `${leftPanePercent}%` }}
         onMouseDown={() => onFocusPane('left')}
         className={cn(
-          'h-full overflow-hidden border-r border-border/40',
-          focusedPane === 'left' && 'shadow-[inset_0_0_0_1px_rgba(0,184,169,0.25)]'
+          'h-full overflow-hidden border-r border-border',
+          focusedPane === 'left' && 'ring-1 ring-inset ring-primary/35'
         )}
       >
         {left}
@@ -93,18 +93,18 @@ export function SplitPaneWorkspace({
           setIsDragging(true)
         }}
         className={cn(
-          'relative w-2 shrink-0 border-x border-border/40 bg-black/25 transition-colors',
-          isDragging ? 'bg-primary/45' : 'hover:bg-primary/25'
+          'relative w-2 shrink-0 border-x border-border bg-surface-2 transition-colors',
+          isDragging ? 'bg-primary/30' : 'hover:bg-surface-3'
         )}
       >
-        <span className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-border/70" />
+        <span className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-borderStrong/80" />
       </button>
       <div
         style={{ width: `${100 - leftPanePercent}%` }}
         onMouseDown={() => onFocusPane('right')}
         className={cn(
           'h-full overflow-hidden',
-          focusedPane === 'right' && 'shadow-[inset_0_0_0_1px_rgba(0,184,169,0.25)]'
+          focusedPane === 'right' && 'ring-1 ring-inset ring-primary/35'
         )}
       >
         {right}

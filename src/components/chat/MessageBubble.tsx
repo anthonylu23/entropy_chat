@@ -25,7 +25,9 @@ export function MessageBubble({ role, content, isStreaming }: MessageBubbleProps
       <div
         className={cn(
           'max-w-[75%] rounded-lg px-4 py-2.5 text-sm leading-relaxed',
-          isUser ? 'bg-primary text-primary-foreground' : 'glass-card'
+          isUser
+            ? 'bg-primary text-primary-foreground'
+            : 'border border-border bg-card text-foreground'
         )}
       >
         <p className="whitespace-pre-wrap">{content}</p>

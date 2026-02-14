@@ -13,7 +13,7 @@ import { SplitPaneWorkspace } from '@renderer/components/layout/SplitPaneWorkspa
 import { ChatView } from '@renderer/components/chat/ChatView'
 import { requireEntropyApi } from '@renderer/lib/ipc'
 import type { SpaceSummary } from '@shared/types'
-import { MessageSquare, Columns2, Focus, Sparkles } from 'lucide-react'
+import { MessageSquare, Sparkles } from 'lucide-react'
 import { Button } from '@renderer/components/ui/button'
 
 const WORKSPACE_LAYOUT_KEY = 'ui.workspaceLayout.v1'
@@ -301,110 +301,66 @@ export function AppShell() {
   )
 
   return (
-    <div className="flex h-screen bg-[radial-gradient(120%_120%_at_0%_0%,rgba(255,255,255,0.07)_0%,rgba(0,0,0,0)_40%)]">
-      {!zenMode && (
-        <SpacesRail
-          spaces={spaces}
-          activeSpaceId={activeSpace.id}
-          onSelectSpace={setActiveSpace}
-          onCreateSpace={handleCreateSpace}
-          onRenameSpace={handleRenameSpace}
-          onReorderSpaces={handleReorderSpaces}
-        />
-      )}
-      {!zenMode && (
-        <WorkspaceSidebar
-          spaceName={activeSpace.name}
-          conversations={conversationsInActiveSpace}
-          activeConversationId={activeConversationId}
-          onSelectConversation={handleOpenConversation}
-          onNewChat={handleNewChat}
-        />
-      )}
-      <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
+    <div className="h-screen bg-background p-2">
+      <div className="flex h-full min-h-0 overflow-hidden rounded-2xl border border-border bg-shell">
         {!zenMode && (
-          <PinnedTabStrip
-            tabConversationIds={tabConversationIds}
-            conversations={conversationsInActiveSpace}
-            activeConversationId={activeConversationId}
-            onSelectConversation={handleOpenConversation}
+          <SpacesRail
+            spaces={spaces}
+            activeSpaceId={activeSpace.id}
+            onSelectSpace={setActiveSpace}
+            onCreateSpace={handleCreateSpace}
+            onRenameSpace={handleRenameSpace}
+            onReorderSpaces={handleReorderSpaces}
           />
         )}
-        <div className="flex h-12 items-center justify-between border-b border-border/50 bg-black/10 px-3">
-          <div className="flex items-center gap-1.5">
-            <Button
-              variant={splitEnabled ? 'default' : 'outline'}
-              size="sm"
-              className="gap-1.5"
-              onClick={() => setSplitEnabled(!splitEnabled)}
-            >
-              <Columns2 className="h-4 w-4" />
-              Split
-            </Button>
-            <Button
-              variant={zenMode ? 'default' : 'outline'}
-              size="sm"
-              className="gap-1.5"
-              onClick={toggleZenMode}
-            >
-              <Sparkles className="h-4 w-4" />
-              Zen
-            </Button>
-            <Button
-              variant={singlePaneFocus ? 'default' : 'outline'}
-              size="sm"
-              className="gap-1.5"
-              onClick={toggleSinglePaneFocus}
-              disabled={!splitEnabled}
-            >
-              <Focus className="h-4 w-4" />
-              Focus
-            </Button>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <button
-              type="button"
-              className={
-                focusedPane === 'left'
-                  ? 'rounded-md bg-primary/20 px-2 py-1 text-foreground'
-                  : 'rounded-md px-2 py-1 hover:text-foreground'
-              }
-              onClick={() => setFocusedPane('left')}
-            >
-              Left
-            </button>
-            {splitEnabled && (
-              <button
-                type="button"
-                className={
-                  focusedPane === 'right'
-                    ? 'rounded-md bg-primary/20 px-2 py-1 text-foreground'
-                    : 'rounded-md px-2 py-1 hover:text-foreground'
-                }
-                onClick={() => setFocusedPane('right')}
+        {!zenMode && (
+          <WorkspaceSidebar
+            spaceName={activeSpace.name}
+            conversations={conversationsInActiveSpace}
+            activeConversationId={activeConversationId}
+            splitEnabled={splitEnabled}
+            singlePaneFocus={singlePaneFocus}
+            focusedPane={focusedPane}
+            onSelectConversation={handleOpenConversation}
+            onNewChat={handleNewChat}
+            onToggleSplit={() => setSplitEnabled(!splitEnabled)}
+            onToggleZen={toggleZenMode}
+            onToggleSinglePaneFocus={toggleSinglePaneFocus}
+            onFocusPane={setFocusedPane}
+          />
+        )}
+        <main className="relative flex min-w-0 flex-1 flex-col overflow-hidden bg-surface-0">
+          {zenMode && (
+            <div className="absolute right-3 top-3 z-20">
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-8 gap-1.5 border-border bg-surface-2"
+                onClick={toggleZenMode}
               >
-                Right
-              </button>
-            )}
-            {splitEnabled && (
-              <span
-                className="rounded-md border border-border/60 bg-black/20 px-2 py-1"
-                title="If this conversation is already open in the opposite pane, focus will jump there."
-              >
-                Re-select focuses existing pane
-              </span>
-            )}
-          </div>
-        </div>
-        <SplitPaneWorkspace
-          splitEnabled={splitEnabled}
-          singlePaneFocus={singlePaneFocus}
-          focusedPane={focusedPane}
-          onFocusPane={setFocusedPane}
-          left={leftPane}
-          right={rightPane}
-        />
-      </main>
+                <Sparkles className="h-3.5 w-3.5" />
+                Exit Zen
+              </Button>
+            </div>
+          )}
+          {!zenMode && (
+            <PinnedTabStrip
+              tabConversationIds={tabConversationIds}
+              conversations={conversationsInActiveSpace}
+              activeConversationId={activeConversationId}
+              onSelectConversation={handleOpenConversation}
+            />
+          )}
+          <SplitPaneWorkspace
+            splitEnabled={splitEnabled}
+            singlePaneFocus={singlePaneFocus}
+            focusedPane={focusedPane}
+            onFocusPane={setFocusedPane}
+            left={leftPane}
+            right={rightPane}
+          />
+        </main>
+      </div>
     </div>
   )
 }
