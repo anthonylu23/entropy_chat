@@ -43,9 +43,9 @@ Worktree mode: not used. This matrix is optimized for a single shared working tr
 | `INT-VIS` | Orchestrator | Visual alignment acceptance pass (`bun test tests`, `bun run typecheck`, `bun run build`) | After `A4` and `B4` | `Planned` |
 | `N1-A` | Coder-A | `A5-DOC-SYNC` (planning/docs consistency sync) | `N1-B` | `Complete` |
 | `N1-B` | Coder-B | `B6-KEYBOARD-COVERAGE` (AppShell shortcut integration tests) | `N1-A` | `Complete` |
-| `N2-A` | Coder-A | `A6-INPUT-GUARDS` (space payload bounds + IPC test hardening) | `N2-B` | `Planned` |
-| `N2-B` | Coder-B | `B7-SPACE-UX` (replace prompt-based space rename/create flows) | `N2-A` | `Planned` |
-| `INT-NEXT` | Orchestrator | Post-follow-up acceptance pass (`bun test tests`, `bun run typecheck`, `bun run build`) | After `N2-A` and `N2-B` | `Planned` |
+| `N2-A` | Coder-A | `A6-INPUT-GUARDS` (space payload bounds + IPC test hardening) | `N2-B` | `Complete` |
+| `N2-B` | Coder-B | `B7-SPACE-UX` (replace prompt-based space rename/create flows) | `N2-A` | `Complete` |
+| `INT-NEXT` | Orchestrator | Post-follow-up acceptance pass (`bun test tests`, `bun run typecheck`, `bun run build`) | After `N2-A` and `N2-B` | `Complete` |
 
 ## Dependency Gates
 

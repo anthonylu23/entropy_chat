@@ -2,7 +2,7 @@
 
 ## Status
 
-Implemented in code (A1/B1/A2/B2/A3/B3/A4 complete). `A5-DOC-SYNC` and `B6-KEYBOARD-COVERAGE` complete. Final release cut pending.
+Implemented in code (A1/B1/A2/B2/A3/B3/A4 complete). `A5-DOC-SYNC`, `B6-KEYBOARD-COVERAGE`, `A6-INPUT-GUARDS`, and `B7-SPACE-UX` complete. Final release cut pending.
 
 This document is the authoritative plan for the next slice after the shipped Phase 1 Slice 1 baseline.
 
@@ -168,7 +168,7 @@ Agent A (platform/docs lane):
 - [x] `A5-DOC-SYNC` Update planning docs to match landed visual and test state.
   - Files: `docs/planning/phase1-slice2-arc-workspace-plan.md`, `docs/planning/phase1-slice2-parallel-execution-matrix.md`, `docs/planning/project-plan-v1.md`.
   - Acceptance: statuses/checklists are internally consistent; no code changes.
-- [ ] `A6-INPUT-GUARDS` Add strict bounds validation for space naming payloads and align backend semantics.
+- [x] `A6-INPUT-GUARDS` Add strict bounds validation for space naming payloads and align backend semantics.
   - Files: `shared/validators.ts`, `tests/shared/validators.test.ts`, `electron/ipc/db.ts`, `tests/electron/ipc-db-spaces-conversations.test.ts`.
   - Acceptance: invalid oversized payloads are rejected in validation and IPC behavior tests.
 
@@ -176,7 +176,7 @@ Agent B (renderer UX lane):
 - [x] `B6-KEYBOARD-COVERAGE` Add AppShell integration tests for keyboard shortcuts (`Cmd/Ctrl+\\`, `Cmd/Ctrl+Shift+F`, `Cmd/Ctrl+Shift+1`, `Cmd/Ctrl+1..2`).
   - Files: `tests/src/components/layout/AppShell.interaction.test.tsx`.
   - Acceptance: shortcut coverage passes and does not regress existing pane/focus behavior.
-- [ ] `B7-SPACE-UX` Replace prompt-based space create/rename flows with explicit UI input controls.
+- [x] `B7-SPACE-UX` Replace prompt-based space create/rename flows with explicit UI input controls.
   - Files: `src/components/layout/SpacesRail.tsx` (+ supporting UI tests as needed).
   - Acceptance: create/rename/reorder semantics preserved; behavior remains testable without `window.prompt`.
 

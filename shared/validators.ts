@@ -16,9 +16,21 @@ import type {
   SettingsGetRequest,
   SettingsSetRequest
 } from '@shared/types'
+import { SPACE_NAME_MAX_LENGTH, SPACE_NAME_MIN_LENGTH } from '@shared/constants'
+
+export { SPACE_NAME_MIN_LENGTH, SPACE_NAME_MAX_LENGTH }
 
 function isNonEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.trim().length > 0
+}
+
+export function isValidSpaceName(value: unknown): value is string {
+  if (typeof value !== 'string') {
+    return false
+  }
+
+  const length = value.trim().length
+  return length >= SPACE_NAME_MIN_LENGTH && length <= SPACE_NAME_MAX_LENGTH
 }
 
 function isObject(value: unknown): value is Record<string, unknown> {
@@ -89,7 +101,7 @@ export function validateSpacesCreateRequest(value: unknown): asserts value is Sp
 
   const candidate = value as { name?: unknown; color?: unknown; icon?: unknown }
   if (
-    !isNonEmptyString(candidate.name) ||
+    !isValidSpaceName(candidate.name) ||
     (candidate.color !== undefined && !isNonEmptyString(candidate.color)) ||
     (candidate.icon !== undefined && !isNonEmptyString(candidate.icon))
   ) {
@@ -110,7 +122,7 @@ export function validateSpacesUpdateRequest(value: unknown): asserts value is Sp
   if (
     !isNonEmptyString(candidate.id) ||
     (!hasName && !hasColor && !hasIcon) ||
-    (hasName && !isNonEmptyString(candidate.name)) ||
+    (hasName && !isValidSpaceName(candidate.name)) ||
     (hasColor &&
       (!isNullableString(candidate.color) ||
         (typeof candidate.color === 'string' && candidate.color.trim().length === 0))) ||

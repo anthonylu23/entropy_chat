@@ -17,6 +17,9 @@ import type {
   SpacesUpdateRequest
 } from '@shared/types'
 import {
+  SPACE_NAME_MAX_LENGTH,
+  SPACE_NAME_MIN_LENGTH,
+  isValidSpaceName,
   validateConversationsCreateRequest,
   validateConversationsMoveToSpaceRequest,
   validateConversationsPinRequest,
@@ -273,6 +276,11 @@ export function createSpace(db: Database, input: SpacesCreateRequest): SpaceSumm
   const id = randomUUID()
   const now = new Date().toISOString()
   const name = input.name.trim()
+  if (!isValidSpaceName(name)) {
+    throw new Error(
+      `Invalid spaces.create payload: name must be between ${SPACE_NAME_MIN_LENGTH} and ${SPACE_NAME_MAX_LENGTH} characters.`
+    )
+  }
   const color = input.color?.trim() ?? null
   const icon = input.icon?.trim() ?? null
   const sortOrder = getNextSpaceSortOrder(db)
@@ -303,8 +311,14 @@ export function updateSpace(db: Database, input: SpacesUpdateRequest): SpaceSumm
   const params: Array<string | null> = []
 
   if (input.name !== undefined) {
+    const name = input.name.trim()
+    if (!isValidSpaceName(name)) {
+      throw new Error(
+        `Invalid spaces.update payload: name must be between ${SPACE_NAME_MIN_LENGTH} and ${SPACE_NAME_MAX_LENGTH} characters.`
+      )
+    }
     setClauses.push('name = ?')
-    params.push(input.name.trim())
+    params.push(name)
   }
   if (input.color !== undefined) {
     setClauses.push('color = ?')

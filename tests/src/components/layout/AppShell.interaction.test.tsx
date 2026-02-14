@@ -136,6 +136,16 @@ function installDom() {
   const originalGlobals = snapshotGlobalDescriptors()
 
   const { window } = dom
+  const htmlElementProto = window.HTMLElement.prototype as unknown as {
+    attachEvent?: (eventName: string, callback: EventListener) => void
+    detachEvent?: (eventName: string, callback: EventListener) => void
+  }
+  if (!htmlElementProto.attachEvent) {
+    htmlElementProto.attachEvent = () => undefined
+  }
+  if (!htmlElementProto.detachEvent) {
+    htmlElementProto.detachEvent = () => undefined
+  }
 
   Object.defineProperty(globalThis, 'window', {
     configurable: true,

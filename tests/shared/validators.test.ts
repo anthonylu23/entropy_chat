@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 import {
+  SPACE_NAME_MAX_LENGTH,
   validateChatStreamCancelRequest,
   validateChatStreamDeltaEvent,
   validateChatStreamDoneEvent,
@@ -72,9 +73,16 @@ describe('shared/validators', () => {
   })
 
   test('validates spaces.create payloads', () => {
+    const maxLengthName = 'A'.repeat(SPACE_NAME_MAX_LENGTH)
+    const overLimitName = 'A'.repeat(SPACE_NAME_MAX_LENGTH + 1)
+
     expectValid(validateSpacesCreateRequest, { name: 'General' })
+    expectValid(validateSpacesCreateRequest, { name: maxLengthName })
+    expectValid(validateSpacesCreateRequest, { name: `  ${maxLengthName}  ` })
     expectValid(validateSpacesCreateRequest, { name: 'Work', color: '#112233', icon: 'briefcase' })
     expectInvalid(validateSpacesCreateRequest, { name: '' }, 'Invalid spaces.create payload')
+    expectInvalid(validateSpacesCreateRequest, { name: '   ' }, 'Invalid spaces.create payload')
+    expectInvalid(validateSpacesCreateRequest, { name: overLimitName }, 'Invalid spaces.create payload')
     expectInvalid(
       validateSpacesCreateRequest,
       { name: 'Team', color: '' },
@@ -83,11 +91,26 @@ describe('shared/validators', () => {
   })
 
   test('validates spaces.update payloads', () => {
+    const maxLengthName = 'A'.repeat(SPACE_NAME_MAX_LENGTH)
+    const overLimitName = 'A'.repeat(SPACE_NAME_MAX_LENGTH + 1)
+
     expectValid(validateSpacesUpdateRequest, { id: 'space_general', name: 'General 2' })
+    expectValid(validateSpacesUpdateRequest, { id: 'space_general', name: maxLengthName })
+    expectValid(validateSpacesUpdateRequest, { id: 'space_general', name: `  ${maxLengthName}  ` })
     expectValid(validateSpacesUpdateRequest, { id: 'space_general', color: '#abc' })
     expectValid(validateSpacesUpdateRequest, { id: 'space_general', color: null, icon: null })
     expectInvalid(validateSpacesUpdateRequest, { id: 'space_general' }, 'Invalid spaces.update payload')
     expectInvalid(validateSpacesUpdateRequest, { id: '', name: 'x' }, 'Invalid spaces.update payload')
+    expectInvalid(
+      validateSpacesUpdateRequest,
+      { id: 'space_general', name: '   ' },
+      'Invalid spaces.update payload'
+    )
+    expectInvalid(
+      validateSpacesUpdateRequest,
+      { id: 'space_general', name: overLimitName },
+      'Invalid spaces.update payload'
+    )
     expectInvalid(
       validateSpacesUpdateRequest,
       { id: 'space_general', icon: '' },

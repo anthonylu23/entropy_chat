@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { Database } from 'bun:sqlite'
 import { beforeAll, describe, expect, mock, test } from 'bun:test'
+import { SPACE_NAME_MAX_LENGTH } from '../../shared/constants'
 
 mock.module('electron', () => ({
   ipcMain: {
@@ -22,7 +23,6 @@ const MIGRATION_002_SQL = readFileSync(
   new URL('../../electron/db/migrations/002_spaces_layout.sql', import.meta.url),
   'utf8'
 )
-
 let dbModule: typeof import('../../electron/ipc/db')
 
 function createInMemoryDb(): Database {
@@ -60,6 +60,20 @@ function getConversationState(db: Database, conversationId: string) {
     .get(conversationId) as
     | { id: string; space_id: string; pinned: number; pinned_order: number | null }
     | null
+}
+
+function getSpaceName(db: Database, spaceId: string): string | null {
+  const row = db
+    .query(
+      `
+        SELECT name
+        FROM spaces
+        WHERE id = ?
+      `
+    )
+    .get(spaceId) as { name: string } | null
+
+  return row?.name ?? null
 }
 
 function assertPinnedOrderInvariant(db: Database, spaceId: string): void {
@@ -160,6 +174,43 @@ describe('electron/ipc/db spaces and conversation semantics', () => {
         })
       ).toThrow('Space not found')
 
+      assertForeignKeyIntegrity(db)
+    } finally {
+      db.close()
+    }
+  })
+
+  test('space name bounds are enforced for create and update operations', () => {
+    const db = createInMemoryDb()
+    try {
+      const maxLengthName = 'A'.repeat(SPACE_NAME_MAX_LENGTH)
+      const overLimitName = 'A'.repeat(SPACE_NAME_MAX_LENGTH + 1)
+
+      const maxCreated = dbModule.createSpace(db as unknown as never, {
+        name: maxLengthName
+      })
+      expect(maxCreated.name).toBe(maxLengthName)
+
+      expect(() =>
+        dbModule.createSpace(db as unknown as never, {
+          name: overLimitName
+        })
+      ).toThrow('name must be between')
+
+      const updatable = dbModule.createSpace(db as unknown as never, {
+        name: 'Mutable'
+      })
+      const originalName = getSpaceName(db, updatable.id)
+      expect(originalName).toBe('Mutable')
+
+      expect(() =>
+        dbModule.updateSpace(db as unknown as never, {
+          id: updatable.id,
+          name: overLimitName
+        })
+      ).toThrow('name must be between')
+
+      expect(getSpaceName(db, updatable.id)).toBe(originalName)
       assertForeignKeyIntegrity(db)
     } finally {
       db.close()

@@ -179,15 +179,15 @@ export function AppShell() {
   )
 
   const handleCreateSpace = useCallback(
-    (name: string) => {
-      createSpace.mutate({ name })
+    async (name: string) => {
+      await createSpace.mutateAsync({ name })
     },
     [createSpace]
   )
 
   const handleRenameSpace = useCallback(
-    (spaceId: string, name: string) => {
-      updateSpace.mutate({ id: spaceId, name })
+    async (spaceId: string, name: string) => {
+      await updateSpace.mutateAsync({ id: spaceId, name })
     },
     [updateSpace]
   )
