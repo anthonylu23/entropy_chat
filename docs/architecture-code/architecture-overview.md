@@ -40,6 +40,31 @@ Validation is intentionally duplicated:
 
 This minimizes malformed payload risk and keeps contracts explicit.
 
+## Visual Contract
+
+The renderer design system follows a flat Arc-minimal visual contract.
+
+- Flat/no-glass constraints:
+  - Surfaces must be flat and solid.
+  - No glassmorphism utilities.
+  - No gradient backgrounds.
+  - No decorative blur or glow effects in the shared design-system layer.
+- Typography contract:
+  - `body` uses the sans stack.
+  - `code, pre` use the mono stack.
+- Required token set:
+  - `shell`
+  - `surface-0`
+  - `surface-1`
+  - `surface-2`
+  - `surface-3`
+  - `border-strong`
+  - Tailwind theme wiring for each required token.
+- Enforcement:
+  - `tests/src/styles/visualTokens.test.ts` is the executable gate for this contract.
+  - The gate scans renderer source for forbidden primitives (gradient/glass aliases, blur/glow utilities).
+  - Any visual-contract change must update docs and tests in the same PR.
+
 ## Workspace Behavior Model (Slice 2)
 
 UI state (`src/stores/uiStore.ts`) tracks:

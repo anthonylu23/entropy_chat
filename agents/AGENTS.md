@@ -16,7 +16,7 @@ If new changes shouldn't be pushed to main, let me (the human) know if I should 
 
 Approvals is not needed for web search, feel free to use web search when necessary.
 
-When dividing tasks for agents, ensure tasks are atomic. Parallel agents are being used (two for now), and I won't be using worktrees.
+When dividing tasks for agents, ensure tasks are atomic. Parallel agents are being used (two for now), and I won't be using worktrees. Make sure to define tasks as Agent A or B, with their respective contexts in mind. Very important, mark whether to run tasks in parallel or not.
 
 If deemed necessary suggest refactors, and I will verify whether or not to make the changes.
 

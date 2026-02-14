@@ -56,11 +56,6 @@
 }
 
 @layer components {
-  /* Compatibility alias while migrating callers to flat utilities. */
-  .glass-card {
-    @apply rounded-lg border border-border bg-card p-4;
-  }
-
   .flat-shell {
     @apply border border-border bg-shell;
   }

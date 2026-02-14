@@ -45,3 +45,23 @@
 - `tests/shared/validators.test.ts`: contract validator behavior.
 - `tests/src/stores/uiStore.test.ts`: pane/space store invariants.
 - `tests/src/lib/ipc.test.ts`: preload bridge utility behavior.
+- `tests/src/components/layout/AppShell.interaction.test.tsx`: AppShell interaction and workspace-control integration coverage.
+- `tests/src/styles/visualTokens.test.ts`: visual style-contract regression gate.
+
+## Style Contract Maintenance
+
+- Gate test:
+  - `tests/src/styles/visualTokens.test.ts` is the gate for style-contract regressions.
+- What it guards:
+  - Flat/no-glass/no-gradient constraints across renderer source.
+  - Typography contract (`body` sans, `code/pre` mono).
+  - Required semantic token presence (`shell`, `surface-*`, `border-strong`).
+  - Tailwind token wiring for these semantic tokens.
+  - Absence of blur/glow visual primitives (`backdrop-blur`, `blur()`, `drop-shadow`).
+- Required update set when visual contract changes:
+  - `src/index.css`
+  - `tailwind.config.ts`
+  - `tests/src/styles/visualTokens.test.ts`
+  - Relevant docs under `docs/architecture-code/*`
+- Reviewer checklist rule:
+  - Reject visual PRs that bypass or weaken this gate without explicit contract update rationale.
