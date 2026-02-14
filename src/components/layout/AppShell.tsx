@@ -5,21 +5,36 @@ import {
   type WorkspaceLayoutSnapshot,
 } from '@renderer/stores/uiStore'
 import { useConversations, useCreateConversation } from '@renderer/hooks/useConversations'
-import { SpacesRail, type WorkspaceSpace } from '@renderer/components/layout/SpacesRail'
+import { useCreateSpace, useReorderSpaces, useSpaces, useUpdateSpace } from '@renderer/hooks/useSpaces'
+import { SpacesRail } from '@renderer/components/layout/SpacesRail'
 import { WorkspaceSidebar } from '@renderer/components/layout/WorkspaceSidebar'
 import { PinnedTabStrip } from '@renderer/components/layout/PinnedTabStrip'
 import { SplitPaneWorkspace } from '@renderer/components/layout/SplitPaneWorkspace'
 import { ChatView } from '@renderer/components/chat/ChatView'
 import { requireEntropyApi } from '@renderer/lib/ipc'
+import type { SpaceSummary } from '@shared/types'
 import { MessageSquare, Columns2, Focus, Sparkles } from 'lucide-react'
 import { Button } from '@renderer/components/ui/button'
 
 const WORKSPACE_LAYOUT_KEY = 'ui.workspaceLayout.v1'
-const DEFAULT_WORKSPACE_SPACE: WorkspaceSpace = {
+const DEFAULT_WORKSPACE_SPACE: SpaceSummary = {
   id: DEFAULT_SPACE_ID,
   name: 'General',
+  color: null,
+  icon: null,
+  sortOrder: 0,
+  isDefault: true,
+  createdAt: '',
+  updatedAt: '',
 }
-const WORKSPACE_SPACES: WorkspaceSpace[] = [DEFAULT_WORKSPACE_SPACE]
+
+function buildPendingSpace(spaceId: string): SpaceSummary {
+  return {
+    ...DEFAULT_WORKSPACE_SPACE,
+    id: spaceId,
+    name: 'Loading...',
+  }
+}
 
 function EmptyPane({ label }: { label: string }) {
   return (
@@ -81,17 +96,30 @@ export function AppShell() {
   const toggleZenMode = useUiStore((s) => s.toggleZenMode)
   const toggleSinglePaneFocus = useUiStore((s) => s.toggleSinglePaneFocus)
 
+  const { data: spaces = [], isFetching: spacesFetching } = useSpaces()
   const { data: conversations = [] } = useConversations()
   const createConversation = useCreateConversation()
+  const createSpace = useCreateSpace()
+  const updateSpace = useUpdateSpace()
+  const reorderSpaces = useReorderSpaces()
 
   const activeSpace = useMemo(
-    () => WORKSPACE_SPACES.find((space) => space.id === activeSpaceId) ?? DEFAULT_WORKSPACE_SPACE,
-    [activeSpaceId]
+    () => {
+      const selected = spaces.find((space) => space.id === activeSpaceId)
+      if (selected) return selected
+
+      if (spacesFetching && activeSpaceId.trim().length > 0) {
+        return buildPendingSpace(activeSpaceId)
+      }
+
+      return spaces[0] ?? DEFAULT_WORKSPACE_SPACE
+    },
+    [activeSpaceId, spaces, spacesFetching]
   )
 
   const conversationsInActiveSpace = useMemo(
-    () => conversations.filter((conversation) => conversation.spaceId === activeSpaceId),
-    [activeSpaceId, conversations]
+    () => conversations.filter((conversation) => conversation.spaceId === activeSpace.id),
+    [activeSpace.id, conversations]
   )
 
   useEffect(() => {
@@ -104,6 +132,13 @@ export function AppShell() {
     }
     openConversationInFocusedPane(conversationsInActiveSpace[0]!.id)
   }, [activeConversationId, conversationsInActiveSpace, openConversationInFocusedPane])
+
+  useEffect(() => {
+    if (spacesFetching) return
+    if (spaces.length === 0) return
+    if (spaces.some((space) => space.id === activeSpaceId)) return
+    setActiveSpace(spaces[0]!.id)
+  }, [activeSpaceId, setActiveSpace, spaces, spacesFetching])
 
   useEffect(() => {
     let cancelled = false
@@ -133,14 +168,35 @@ export function AppShell() {
   }, [hydrateWorkspaceLayout])
 
   const handleNewChat = useCallback(() => {
-    createConversation.mutate(undefined)
-  }, [createConversation])
+    createConversation.mutate({ spaceId: activeSpace.id })
+  }, [activeSpace.id, createConversation])
 
   const handleOpenConversation = useCallback(
     (conversationId: string) => {
       openConversationInFocusedPane(conversationId)
     },
     [openConversationInFocusedPane]
+  )
+
+  const handleCreateSpace = useCallback(
+    (name: string) => {
+      createSpace.mutate({ name })
+    },
+    [createSpace]
+  )
+
+  const handleRenameSpace = useCallback(
+    (spaceId: string, name: string) => {
+      updateSpace.mutate({ id: spaceId, name })
+    },
+    [updateSpace]
+  )
+
+  const handleReorderSpaces = useCallback(
+    (orderedSpaceIds: string[]) => {
+      reorderSpaces.mutate({ orderedSpaceIds })
+    },
+    [reorderSpaces]
   )
 
   useEffect(() => {
@@ -206,7 +262,7 @@ export function AppShell() {
 
       if (!event.shiftKey && /^[1-9]$/.test(event.key)) {
         const index = Number(event.key) - 1
-        const nextSpace = WORKSPACE_SPACES[index]
+        const nextSpace = spaces[index]
         if (nextSpace) {
           event.preventDefault()
           setActiveSpace(nextSpace.id)
@@ -222,6 +278,7 @@ export function AppShell() {
     handleNewChat,
     setActiveSpace,
     setSplitEnabled,
+    spaces,
     splitEnabled,
     toggleSinglePaneFocus,
     toggleZenMode,
@@ -229,7 +286,7 @@ export function AppShell() {
 
   const leftConversationId = paneConversations.left
   const rightConversationId = paneConversations.right
-  const tabConversationIds = openTabsBySpace[activeSpaceId] ?? []
+  const tabConversationIds = openTabsBySpace[activeSpace.id] ?? []
 
   const leftPane = leftConversationId ? (
     <ChatView conversationId={leftConversationId} />
@@ -247,9 +304,12 @@ export function AppShell() {
     <div className="flex h-screen bg-[radial-gradient(120%_120%_at_0%_0%,rgba(255,255,255,0.07)_0%,rgba(0,0,0,0)_40%)]">
       {!zenMode && (
         <SpacesRail
-          spaces={WORKSPACE_SPACES}
+          spaces={spaces}
           activeSpaceId={activeSpace.id}
           onSelectSpace={setActiveSpace}
+          onCreateSpace={handleCreateSpace}
+          onRenameSpace={handleRenameSpace}
+          onReorderSpaces={handleReorderSpaces}
         />
       )}
       {!zenMode && (

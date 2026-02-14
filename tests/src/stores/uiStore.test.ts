@@ -19,9 +19,11 @@ describe('src/stores/uiStore', () => {
   test('setActiveConversation updates active conversation', () => {
     useUiStore.getState().setActiveConversation('conv_123')
     expect(useUiStore.getState().activeConversationId).toBe('conv_123')
+    expect(useUiStore.getState().paneConversations.left).toBe('conv_123')
 
     useUiStore.getState().setActiveConversation(null)
     expect(useUiStore.getState().activeConversationId).toBeNull()
+    expect(useUiStore.getState().paneConversations.left).toBeNull()
   })
 
   test('toggleSidebar flips sidebarOpen', () => {
@@ -96,5 +98,68 @@ describe('src/stores/uiStore', () => {
     expect(state.paneConversations.left).toBe('conv_shared')
     expect(state.paneConversations.right).toBeNull()
     expect(state.activeConversationId).toBeNull()
+  })
+
+  test('openConversationInFocusedPane focuses the pane that already has the conversation in split mode', () => {
+    useUiStore.setState({
+      activeConversationId: 'conv_left',
+      activeSpaceId: DEFAULT_SPACE_ID,
+      focusedPane: 'left',
+      splitEnabled: true,
+      paneConversations: { left: 'conv_left', right: 'conv_right' },
+      openTabsBySpace: {
+        [DEFAULT_SPACE_ID]: ['conv_left', 'conv_right'],
+      },
+    })
+
+    useUiStore.getState().openConversationInFocusedPane('conv_right')
+    const state = useUiStore.getState()
+
+    expect(state.focusedPane).toBe('right')
+    expect(state.activeConversationId).toBe('conv_right')
+    expect(state.paneConversations.left).toBe('conv_left')
+    expect(state.paneConversations.right).toBe('conv_right')
+  })
+
+  test('openConversationInFocusedPane clears hidden duplicate when split mode is off', () => {
+    useUiStore.setState({
+      activeConversationId: 'conv_left',
+      activeSpaceId: DEFAULT_SPACE_ID,
+      focusedPane: 'left',
+      splitEnabled: false,
+      paneConversations: { left: 'conv_left', right: 'conv_right' },
+      openTabsBySpace: {
+        [DEFAULT_SPACE_ID]: ['conv_left', 'conv_right'],
+      },
+    })
+
+    useUiStore.getState().openConversationInFocusedPane('conv_right')
+    const state = useUiStore.getState()
+
+    expect(state.focusedPane).toBe('left')
+    expect(state.activeConversationId).toBe('conv_right')
+    expect(state.paneConversations.left).toBe('conv_right')
+    expect(state.paneConversations.right).toBeNull()
+  })
+
+  test('openConversationInPane respects single-instance rule in split mode', () => {
+    useUiStore.setState({
+      activeConversationId: 'conv_left',
+      activeSpaceId: DEFAULT_SPACE_ID,
+      focusedPane: 'left',
+      splitEnabled: true,
+      paneConversations: { left: 'conv_left', right: 'conv_right' },
+      openTabsBySpace: {
+        [DEFAULT_SPACE_ID]: ['conv_left', 'conv_right'],
+      },
+    })
+
+    useUiStore.getState().openConversationInPane('left', 'conv_right')
+    const state = useUiStore.getState()
+
+    expect(state.focusedPane).toBe('right')
+    expect(state.activeConversationId).toBe('conv_right')
+    expect(state.paneConversations.left).toBe('conv_left')
+    expect(state.paneConversations.right).toBe('conv_right')
   })
 })
