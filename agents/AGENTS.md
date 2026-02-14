@@ -1,6 +1,7 @@
 Build test as you deem necessary.
 
-Update docs as we go (with your best judgement) as necessary.
+Update docs as we go (with your best judgement) as necessary. Document both tasks and codebase changes.
+
 If you are an agent working in parallel with another, be aware of the work the other agents will/are doing
 
 Feel free to modify AGENTS.md if necessary
@@ -16,3 +17,5 @@ If new changes shouldn't be pushed to main, let me (the human) know if I should 
 Approvals is not needed for web search, feel free to use web search when necessary.
 
 When dividing tasks for agents, ensure tasks are atomic. Parallel agents are being used (two for now), and I won't be using worktrees.
+
+If deemed necessary suggest refactors, and I will verify whether or not to make the changes.
