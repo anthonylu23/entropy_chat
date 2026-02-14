@@ -64,9 +64,9 @@ After running `bun run dev`, confirm the following:
 - Chat UI: sidebar with conversation list, message thread, input bar (Tailwind + shadcn/ui)
 - Zustand for UI state, TanStack Query for data fetching
 
-## Next Planned Slice (Phase 1 — Slice 2: Arc Workspace UI)
+## Phase 1 — Slice 2 (Arc Workspace UI) Status
 
-Planned only (not yet shipped). Details: [`docs/phase1-slice2-arc-workspace-plan.md`](/Users/anthony/Documents/CS/Coding/entropy_chat/docs/phase1-slice2-arc-workspace-plan.md)
+Implemented in code and currently in validation/release prep. Details: [`docs/planning/phase1-slice2-arc-workspace-plan.md`](docs/planning/phase1-slice2-arc-workspace-plan.md)
 
 ### Planned capabilities
 
@@ -76,13 +76,14 @@ Planned only (not yet shipped). Details: [`docs/phase1-slice2-arc-workspace-plan
 - Focus modes: Zen mode and single-pane focus.
 - Arc-neutral dark shell styling and workspace navigation polish.
 
-### Planned API/data changes (not implemented yet)
+### API/data changes status
 
-- New `spaces.*` IPC/preload API: `list`, `create`, `update`, `reorder`.
-- Extended `conversations.*` operations:
+- Implemented in code: new `spaces.*` IPC/preload API (`list`, `create`, `update`, `reorder`).
+- Implemented in code: extended `conversations.*` operations:
   - `create` with optional `spaceId`
   - `pin`
   - `reorderPinned`
   - `moveToSpace`
-- `ConversationSummary` planned additions: `spaceId`, `pinnedOrder`.
-- UI store planned additions for split/focus/pane state.
+- Implemented in code: `ConversationSummary` fields `spaceId` and `pinnedOrder`.
+- Implemented in code: UI store additions for split/focus/pane state.
+- Implemented in code: shell wired to live spaces data with create/rename/reorder UI flows.

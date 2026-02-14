@@ -7,10 +7,10 @@ Completed baseline (shipped).
 ## Follow-up Slice
 
 Arc workspace planning is tracked in:
-[`docs/phase1-slice2-arc-workspace-plan.md`](/Users/anthony/Documents/CS/Coding/entropy_chat/docs/phase1-slice2-arc-workspace-plan.md)
+[`docs/planning/phase1-slice2-arc-workspace-plan.md`](phase1-slice2-arc-workspace-plan.md)
 
 Parallel execution matrix for the Slice 2 build:
-[`docs/phase1-slice2-parallel-execution-matrix.md`](/Users/anthony/Documents/CS/Coding/entropy_chat/docs/phase1-slice2-parallel-execution-matrix.md)
+[`docs/planning/phase1-slice2-parallel-execution-matrix.md`](phase1-slice2-parallel-execution-matrix.md)
 
 ## Summary
 

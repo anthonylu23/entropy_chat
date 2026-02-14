@@ -50,7 +50,7 @@ Gemini)              via session
 
 **Key principle:** The renderer never touches Node APIs, SQLite, or raw API keys. Everything goes through typed IPC handlers in the main process.
 
-Near-term workspace planning is tracked in [`docs/phase1-slice2-arc-workspace-plan.md`](/Users/anthony/Documents/CS/Coding/entropy_chat/docs/phase1-slice2-arc-workspace-plan.md).
+Near-term workspace planning is tracked in [`docs/planning/phase1-slice2-arc-workspace-plan.md`](phase1-slice2-arc-workspace-plan.md).
 
 ---
 
@@ -273,6 +273,8 @@ This is the "bring your own subscription" feature. Users with existing ChatGPT P
 
 ### Workspace Layout
 
+The workspace follows Arc browser's layout paradigm: a left sidebar containing spaces, conversation list, and bottom controls (settings + space switcher), with the main chat viewport rendered as a rounded, bordered container that the sidebar wraps around.
+
 Planned near-term (Phase 1 Slice 2): Arc-style workspace shell with persistent spaces, per-space pinned tabs, two-pane split view, and focus modes (Zen mode + single-pane focus).
 
 Planned later (Phase 3+): advanced multi-pane layouts (3-4 panes), grid variants, and broadcast comparison mode.
@@ -283,120 +285,142 @@ Stored in Convex, injected into system prompts as context. Supports user-defined
 
 ### Design System & Theme Engine
 
-The app's visual identity is built on a glassmorphism-forward design system with warm neutrals, monospace typography, and generous rounding. A VS Code-style theming engine allows bundled and user-created custom themes on top of this foundation.
+The app's visual identity is inspired by Arc browser: clean, minimal, and flat. No gradients, glassmorphism, glow, or blur effects. The design relies on solid backgrounds, clear borders, and restrained color usage with shadcn/ui components as the foundation.
+
+#### Design Inspiration — Arc Browser
+
+The layout follows Arc's distinctive pattern:
+
+- **Sidebar + wrapped content area:** A narrow sidebar sits on the left. The main chat viewport is visually wrapped by a continuous border/rounded container, creating a clear separation between navigation and content — like Arc's sidebar wrapping around the web view.
+- **Sidebar bottom bar:** Settings button and space switcher live at the bottom of the sidebar (not the top), mirroring Arc's bottom controls.
+- **Flat, solid surfaces:** No gradients, no blur, no glare. Surfaces use solid background colors with subtle elevation through border and background shade differences only.
+- **Compact, dense controls:** Navigation elements (space icons, conversation list, pinned tabs) use compact desktop density.
+- **Minimal chrome:** The app should feel like content-first with navigation tucked away cleanly.
 
 #### Core Aesthetic
 
-- **Monospace-first typography** — IBM Plex Mono as primary font for a technical/minimal feel
-- **Warm neutrals** — backgrounds have slight warmth (not pure gray)
-- **Glassmorphism** — blur, saturation boost, subtle gradients, layered inset/depth shadows
-- **Generous border radius** — 24px primary radius for a soft, modern feel
-- **High contrast text** — warm off-white on dark, dark brown on light
+- **System font stack** — uses the OS default sans-serif for a native feel; monospace reserved for code blocks only
+- **Neutral darks** — true neutral grays (no warm tint), inspired by Arc's dark mode palette
+- **Flat surfaces** — solid background colors, no gradients or blur
+- **Rounded content container** — the main viewport has generous rounding (12-16px) with a visible border, echoing Arc's wrapped content area
+- **Restrained accent** — accent color used sparingly for active/selected states only
+- **shadcn/ui defaults** — leverage shadcn's built-in design tokens and component styling
 
 #### Typography
 
 ```
-Font Family: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace
-Weights: 400 (regular), 500 (medium), 600 (semibold), 700 (bold)
+Font Family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif
+Code Font: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace
+Weights: 400 (regular), 500 (medium), 600 (semibold)
 ```
 
 #### Color Tokens
 
-**Dark Theme (Default)**
+**Dark Theme (Default)** — Arc-inspired neutral dark
 
-| Token              | Hex       | Usage                         |
-| ------------------ | --------- | ----------------------------- |
-| `--base`           | `#3a3b3b` | Page background               |
-| `--surface`        | `#434545` | Cards, elevated surfaces      |
-| `--elevated`       | `#4c4d4d` | Higher elevation surfaces     |
-| `--accent`         | `#00b8a9` | Primary accent (teal/cyan)    |
-| `--accent-hover`   | `#00a899` | Hover state                   |
-| `--glow`           | `#00b8a9` | Glow effects                  |
-| `--text-primary`   | `#e8e5e2` | Primary text (warm off-white) |
-| `--text-secondary` | `#b8b5b2` | Secondary/muted text          |
-| `--text-inverse`   | `#16181c` | Text on light backgrounds     |
-| `--border`         | `#5e6165` | Borders                       |
-| `--destructive`    | `#c72c2c` | Error/destructive actions     |
+| Token              | Hex       | Usage                                   |
+| ------------------ | --------- | --------------------------------------- |
+| `--background`     | `#1a1a1a` | App/window background (behind sidebar)  |
+| `--sidebar`        | `#1a1a1a` | Sidebar background (same as app bg)     |
+| `--surface`        | `#2b2b2b` | Main content area / chat viewport       |
+| `--surface-hover`  | `#333333` | Hover state on surface elements         |
+| `--muted`          | `#3a3a3a` | Muted backgrounds (input fields, etc.)  |
+| `--accent`         | `#5b9bf7` | Primary accent (restrained blue)        |
+| `--accent-hover`   | `#4a8ae6` | Hover state                             |
+| `--text-primary`   | `#e4e4e4` | Primary text                            |
+| `--text-secondary` | `#999999` | Secondary/muted text                    |
+| `--border`         | `#3a3a3a` | Borders (subtle, low contrast)          |
+| `--border-strong`  | `#4a4a4a` | Content area wrapper border             |
+| `--destructive`    | `#e5484d` | Error/destructive actions               |
 
 **Light Theme**
 
-| Token              | Hex       | Usage                         |
-| ------------------ | --------- | ----------------------------- |
-| `--base`           | `#e8d9b8` | Page background (warm tan)    |
-| `--surface`        | `#fcf2d0` | Cards (warm cream)            |
-| `--accent`         | `#d99a1f` | Primary accent (golden amber) |
-| `--accent-hover`   | `#b37a11` | Hover state                   |
-| `--text-primary`   | `#3a3736` | Primary text                  |
-| `--text-secondary` | `#665f58` | Secondary text                |
-| `--border`         | `#d4c8a8` | Borders                       |
+| Token              | Hex       | Usage                                   |
+| ------------------ | --------- | --------------------------------------- |
+| `--background`     | `#f0f0f0` | App/window background                   |
+| `--sidebar`        | `#f0f0f0` | Sidebar background                      |
+| `--surface`        | `#ffffff` | Main content area / chat viewport       |
+| `--surface-hover`  | `#f5f5f5` | Hover state on surface elements         |
+| `--muted`          | `#e8e8e8` | Muted backgrounds                       |
+| `--accent`         | `#2563eb` | Primary accent (blue)                   |
+| `--accent-hover`   | `#1d4ed8` | Hover state                             |
+| `--text-primary`   | `#1a1a1a` | Primary text                            |
+| `--text-secondary` | `#666666` | Secondary text                          |
+| `--border`         | `#e0e0e0` | Borders                                 |
+| `--border-strong`  | `#d0d0d0` | Content area wrapper border             |
+| `--destructive`    | `#dc2626` | Error/destructive actions               |
 
-#### Glassmorphism Effects
+#### Layout Structure
 
-```css
-/* Backdrop blur */
-backdrop-filter: blur(18px) saturate(1.85) brightness(1.1);
-
-/* Glass surface (dark) */
-background: linear-gradient(
-  145deg,
-  rgba(20, 22, 30, 0.55),
-  rgba(255, 255, 255, 0.08)
-);
-border: 1px solid rgba(255, 255, 255, 0.22);
-
-/* Glass surface (light) */
-background: linear-gradient(
-  145deg,
-  rgba(255, 255, 255, 0.2),
-  rgba(255, 255, 255, 0.05)
-);
-border: 1px solid rgba(255, 255, 255, 0.32);
-
-/* Glow shadow */
-box-shadow: 0 20px 45px hsl(var(--glow) / 0.35);
-
-/* Glass depth shadow (dark) */
-box-shadow:
-  inset 0 1px 0 rgba(255, 255, 255, 0.2),
-  inset 0 -1px 0 rgba(255, 255, 255, 0.1),
-  0 12px 32px rgba(3, 7, 18, 0.7),
-  0 25px 55px rgba(3, 7, 18, 0.4);
 ```
+┌──────────────────────────────────────────────────────┐
+│ Window (--background)                                │
+│ ┌─────────┬────────────────────────────────────────┐ │
+│ │Sidebar  │ ┌────────────────────────────────────┐ │ │
+│ │         │ │                                    │ │ │
+│ │ Search  │ │  Chat Viewport (--surface)         │ │ │
+│ │         │ │  rounded-xl border border-strong   │ │ │
+│ │ Pinned  │ │                                    │ │ │
+│ │ Convos  │ │                                    │ │ │
+│ │         │ │                                    │ │ │
+│ │ Recent  │ │                                    │ │ │
+│ │ Convos  │ │                                    │ │ │
+│ │         │ │                                    │ │ │
+│ │         │ │                                    │ │ │
+│ │         │ └────────────────────────────────────┘ │ │
+│ │─────────│                                        │ │
+│ │ Spaces  │                                        │ │
+│ │Settings │                                        │ │
+│ └─────────┴────────────────────────────────────────┘ │
+└──────────────────────────────────────────────────────┘
+```
+
+The sidebar and content area share the same outer container. The chat viewport is a distinct rounded, bordered surface that sits inside this container — creating the Arc-style "border wrapping around content" effect.
 
 #### Tailwind Config
 
 ```typescript
-// tailwind.config.ts
+// tailwind.config.ts — extends shadcn/ui defaults
 module.exports = {
   darkMode: ["class"],
   theme: {
     extend: {
       colors: {
-        base: "hsl(var(--base))",
+        // Uses shadcn/ui CSS variable convention
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        sidebar: "hsl(var(--sidebar))",
         surface: "hsl(var(--surface))",
-        elevated: "hsl(var(--elevated))",
+        "surface-hover": "hsl(var(--surface-hover))",
+        muted: "hsl(var(--muted))",
         accent: "hsl(var(--accent))",
-        accentHover: "hsl(var(--accent-hover))",
-        textPrimary: "hsl(var(--text-primary))",
-        textSecondary: "hsl(var(--text-secondary))",
-        textInverse: "hsl(var(--text-inverse))",
+        "accent-hover": "hsl(var(--accent-hover))",
+        border: "hsl(var(--border))",
+        "border-strong": "hsl(var(--border-strong))",
+        destructive: "hsl(var(--destructive))",
       },
       fontFamily: {
         sans: [
-          '"IBM Plex Mono"',
+          "system-ui",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          '"Segoe UI"',
+          "Roboto",
+          "sans-serif",
+        ],
+        mono: [
           "ui-monospace",
           "SFMono-Regular",
+          '"SF Mono"',
           "Menlo",
           "monospace",
         ],
       },
-      boxShadow: {
-        glow: "0 20px 45px hsl(var(--glow) / 0.35)",
-      },
       borderRadius: {
-        lg: "1.5rem",
-        md: "calc(1.5rem - 2px)",
-        sm: "calc(1.5rem - 4px)",
+        xl: "1rem",
+        lg: "0.75rem",
+        md: "0.5rem",
+        sm: "0.25rem",
       },
     },
   },
@@ -406,9 +430,9 @@ module.exports = {
 
 #### Custom Theme Engine (VS Code-style)
 
-On top of the core design system, users can install additional themes. Themes are JSON files that override the CSS variable tokens, allowing full palette customization while preserving the glassmorphism effects, typography, and spacing.
+On top of the core design system, users can install additional themes. Themes are JSON files that override the CSS variable tokens, allowing full palette customization while preserving the flat/minimal aesthetic, typography, and spacing.
 
-**Bundled themes:** Dark (default), Light, Monokai, Solarized Dark, Solarized Light, Nord, Catppuccin, Dracula, GitHub Dark, One Dark Pro.
+**Bundled themes:** Dark (default), Light, Nord, Catppuccin, Dracula, GitHub Dark, One Dark Pro.
 
 **Theme file structure:**
 
@@ -418,16 +442,17 @@ On top of the core design system, users can install additional themes. Themes ar
   "name": "Nord",
   "type": "dark",
   "colors": {
-    "base": "220 16% 22%",
-    "surface": "220 16% 26%",
-    "elevated": "220 16% 30%",
+    "background": "220 16% 10%",
+    "sidebar": "220 16% 10%",
+    "surface": "220 16% 18%",
+    "surface-hover": "220 16% 22%",
+    "muted": "220 16% 26%",
     "accent": "193 43% 67%",
     "accent-hover": "193 43% 60%",
-    "glow": "193 43% 67%",
     "text-primary": "219 28% 88%",
-    "text-secondary": "219 20% 72%",
-    "text-inverse": "220 16% 12%",
-    "border": "220 16% 36%",
+    "text-secondary": "219 20% 65%",
+    "border": "220 16% 24%",
+    "border-strong": "220 16% 30%",
     "destructive": "354 42% 56%",
   },
 }
@@ -469,36 +494,41 @@ Status: shipped (Slice 1 baseline).
 
 ### Phase 1 — Slice 2 (Arc Workspace UI) (1–2 weeks)
 
-Status: planned.
+Status: implemented in code and validated (`bun test tests`, `bun run typecheck`, `bun run build`); release cut pending.
 
-Detailed plan: [`docs/phase1-slice2-arc-workspace-plan.md`](/Users/anthony/Documents/CS/Coding/entropy_chat/docs/phase1-slice2-arc-workspace-plan.md)
+Detailed plan: [`docs/planning/phase1-slice2-arc-workspace-plan.md`](phase1-slice2-arc-workspace-plan.md)
 
-Parallel execution matrix (1 orchestrator + 2 coders): [`docs/phase1-slice2-parallel-execution-matrix.md`](/Users/anthony/Documents/CS/Coding/entropy_chat/docs/phase1-slice2-parallel-execution-matrix.md)
+Parallel execution matrix (1 orchestrator + 2 coders): [`docs/planning/phase1-slice2-parallel-execution-matrix.md`](phase1-slice2-parallel-execution-matrix.md)
 
-- [ ] `P1S2-01` Add SQLite migration file for spaces schema.
-- [ ] `P1S2-02` Backfill existing conversations with default `space_id`.
-- [ ] `P1S2-03` Add `spaces.list` IPC + preload API.
-- [ ] `P1S2-04` Add `spaces.create` IPC + preload API.
-- [ ] `P1S2-05` Add `spaces.update` IPC + preload API.
-- [ ] `P1S2-06` Add `spaces.reorder` IPC + preload API.
-- [ ] `P1S2-07` Add `conversations.create(...spaceId)` API support.
-- [ ] `P1S2-08` Add `conversations.pin` API support.
-- [ ] `P1S2-09` Add `conversations.reorderPinned` API support.
-- [ ] `P1S2-10` Add `conversations.moveToSpace` API support.
-- [ ] `P1S2-11` Add `ConversationSummary.spaceId`.
-- [ ] `P1S2-12` Add `ConversationSummary.pinnedOrder`.
-- [ ] `P1S2-13` Add Arc workspace shell container.
-- [ ] `P1S2-14` Add spaces rail UI.
-- [ ] `P1S2-15` Add per-space sidebar UI.
-- [ ] `P1S2-16` Add per-space pinned tab strip UI.
-- [ ] `P1S2-17` Add two-pane split workspace UI.
-- [ ] `P1S2-18` Add draggable split divider behavior.
-- [ ] `P1S2-19` Add Zen mode toggle behavior.
-- [ ] `P1S2-20` Add single-pane focus toggle behavior.
-- [ ] `P1S2-21` Add workspace state fields to UI store.
-- [ ] `P1S2-22` Persist workspace layout settings.
-- [ ] `P1S2-23` Add keyboard shortcuts for spaces and focus/split toggles.
-- [ ] `P1S2-24` Apply Arc neutral dark styling to shell navigation surfaces.
+- [x] `P1S2-01` Add SQLite migration file for spaces schema.
+- [x] `P1S2-02` Backfill existing conversations with default `space_id`.
+- [x] `P1S2-03` Add `spaces.list` IPC + preload API.
+- [x] `P1S2-04` Add `spaces.create` IPC + preload API.
+- [x] `P1S2-05` Add `spaces.update` IPC + preload API.
+- [x] `P1S2-06` Add `spaces.reorder` IPC + preload API.
+- [x] `P1S2-07` Add `conversations.create(...spaceId)` API support.
+- [x] `P1S2-08` Add `conversations.pin` API support.
+- [x] `P1S2-09` Add `conversations.reorderPinned` API support.
+- [x] `P1S2-10` Add `conversations.moveToSpace` API support.
+- [x] `P1S2-11` Add `ConversationSummary.spaceId`.
+- [x] `P1S2-12` Add `ConversationSummary.pinnedOrder`.
+- [x] `P1S2-13` Add Arc workspace shell container.
+- [x] `P1S2-14` Add spaces rail UI.
+- [x] `P1S2-15` Add per-space sidebar UI.
+- [x] `P1S2-16` Add per-space pinned tab strip UI.
+- [x] `P1S2-17` Add two-pane split workspace UI.
+- [x] `P1S2-18` Add draggable split divider behavior.
+- [x] `P1S2-19` Add Zen mode toggle behavior.
+- [x] `P1S2-20` Add single-pane focus toggle behavior.
+- [x] `P1S2-21` Add workspace state fields to UI store.
+- [x] `P1S2-22` Persist workspace layout settings.
+- [x] `P1S2-23` Add keyboard shortcuts for spaces and focus/split toggles.
+- [x] `P1S2-24` Apply Arc neutral dark styling to shell navigation surfaces.
+- [x] `P1S2-25` Bind space navigation UI to live `spaces.list` data (remove static local fallback as primary source).
+- [x] `P1S2-26` Add UI flows for `spaces.create`, `spaces.update`, and `spaces.reorder`.
+- [x] `P1S2-27` Add backend behavior tests for new spaces/pinned/move operations.
+- [x] `P1S2-28` Add pane/space invariants test coverage in UI store and shell integration paths.
+- [x] `P1S2-29` Run and document final Slice 2 acceptance/regression pass.
 
 **Planned milestone:** Arc-style workspace shell on top of Slice 1 baseline (spaces, per-space pinned tabs, two-pane split, focus modes).
 
@@ -522,9 +552,9 @@ Parallel execution matrix (1 orchestrator + 2 coders): [`docs/phase1-slice2-para
 - [ ] `P2-16` Add `Cmd+K` model switch shortcut.
 - [ ] `P2-17` Add `Cmd+N` new chat shortcut.
 - [ ] `P2-18` Add `Cmd+,` settings shortcut.
-- [ ] `P2-19` Define CSS variable tokens for design system.
-- [ ] `P2-20` Add reusable glassmorphism utility classes.
-- [ ] `P2-21` Configure IBM Plex Mono typography tokens.
+- [ ] `P2-19` Define CSS variable tokens for Arc-minimal design system.
+- [ ] `P2-20` Add reusable flat surface/border utility classes (no glassmorphism).
+- [ ] `P2-21` Configure system font stack typography tokens.
 - [ ] `P2-22` Wire Tailwind config to design tokens (colors, shadows, radii).
 - [ ] `P2-23` Implement theme JSON loader.
 - [ ] `P2-24` Implement runtime `:root` variable injection.
